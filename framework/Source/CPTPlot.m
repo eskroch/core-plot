@@ -2,6 +2,7 @@
 
 #import "CPTExceptions.h"
 #import "CPTFill.h"
+#import "CPTFunctionDataSource.h" // S.Wainwright
 #import "CPTGraph.h"
 #import "CPTLegend.h"
 #import "CPTLineStyle.h"
@@ -15,7 +16,6 @@
 #import "CPTShadow.h"
 #import "CPTTextLayer.h"
 #import "CPTUtilities.h"
-#import "CPTFunctionDataSource.h"  // S.Wainwright
 #import "NSCoderExtensions.h"
 #import <tgmath.h>
 
@@ -114,7 +114,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
  *
  *  Default is nil.
  **/
-@synthesize appearanceDataSource;  // Added S.Wainwright
+@synthesize appearanceDataSource; // Added S.Wainwright
 
 /** @property nullable NSString *title
  *  @brief The title of the plot displayed in the legend.
@@ -624,7 +624,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
 
             int8_t *start      = [numericData mutableSamplePointer:idx];
             size_t bytesToMove = numericData.data.length - (idx + numberOfRecords) * sampleSize;
-            if ( (int)bytesToMove > 0 ) {
+            if ((int)bytesToMove > 0 ) {
                 memmove(start + length, start, bytesToMove);
             }
         }
@@ -657,7 +657,8 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
  *  @param numberOfRecords The number of records to insert.
  **/
 
--(void)replaceDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords { // added S.Wainwright 21/01/2021
+-(void)replaceDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords // added S.Wainwright 21/01/2021
+{
     NSParameterAssert(idx <= self.cachedDataCount);
     Class numericClass = [CPTNumericData class];
 
@@ -669,7 +670,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
 
             int8_t *start      = [numericData mutableSamplePointer:idx];
             size_t bytesToMove = numericData.data.length - (idx + numberOfRecords) * sampleSize;
-            if ( (int)bytesToMove > 0 ) {
+            if ((int)bytesToMove > 0 ) {
                 memmove(start + length, start, bytesToMove);
             }
         }
@@ -711,7 +712,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
             int8_t *start                      = [numericData mutableSamplePointer:indexRange.location];
             size_t length                      = sampleSize * indexRange.length;
             size_t bytesToMove                 = numericData.data.length - (indexRange.location + indexRange.length) * sampleSize;
-            if ( (int)bytesToMove > 0 ) {
+            if ((int)bytesToMove > 0 ) {
                 memmove(start, start + length, bytesToMove);
             }
 
@@ -741,75 +742,76 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
 }
 
 //// added S.Wainwright 21/01/2021
-///** @brief Insert records into the plot data cache at the given row index. Accommodates a square of data left to right in columns and down to up in rows
+/// ** @brief Insert records into the plot data cache at the given row index. Accommodates a square of data left to right in columns and down to up in rows
 // *  @param idx The starting index of the new row records.
 // *  @param numberOfRecords The number of records to insert.
 // *  @param columnCount The number of columns.
 // *  @param rowCount The number of rows.
 // **/
-//-(void)insertRowDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount {  // added S.Wainwright 21/01/2021
-//    NSParameterAssert(idx <= self.cachedDataCount);
-//    Class numericClass = [CPTNumericData class];
+// -(void)insertRowDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount {  // added S.Wainwright 21/01/2021
+// NSParameterAssert(idx <= self.cachedDataCount);
+// Class numericClass = [CPTNumericData class];
 //
-//    for ( id data in self.cachedData.allValues ) {
-//        if ( [data isKindOfClass:numericClass] ) {
-//            CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
-//            size_t sampleSize                  = numericData.sampleBytes;
-//            size_t length                      = sampleSize * numberOfRecords;
+// for ( id data in self.cachedData.allValues ) {
+// if ( [data isKindOfClass:numericClass] ) {
+// CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
+// size_t sampleSize                  = numericData.sampleBytes;
+// size_t length                      = sampleSize * numberOfRecords;
 //
-//            [(NSMutableData *) numericData.data increaseLengthBy:length];
+// [(NSMutableData *) numericData.data increaseLengthBy:length];
 //
-//            int8_t *start      = [numericData mutableSamplePointer:idx];
-//            size_t bytesToMove = numericData.data.length - (idx + numberOfRecords) * sampleSize;
-//            if ( (int)bytesToMove > 0 ) {
-//                memmove(start + length, start, bytesToMove);
-//            }
-//        }
-//        else {
-//            NSMutableArray *array = (NSMutableArray *)data;
-//            NSNull *nullObject    = [NSNull null];
-//            NSUInteger lastIndex  = idx + numberOfRecords - 1;
-//            for ( NSUInteger i = idx; i <= lastIndex; i++ ) {
-//                [array insertObject:nullObject atIndex:i];
-//            }
-//        }
-//    }
+// int8_t *start      = [numericData mutableSamplePointer:idx];
+// size_t bytesToMove = numericData.data.length - (idx + numberOfRecords) * sampleSize;
+// if ( (int)bytesToMove > 0 ) {
+// memmove(start + length, start, bytesToMove);
+// }
+// }
+// else {
+// NSMutableArray *array = (NSMutableArray *)data;
+// NSNull *nullObject    = [NSNull null];
+// NSUInteger lastIndex  = idx + numberOfRecords - 1;
+// for ( NSUInteger i = idx; i <= lastIndex; i++ ) {
+// [array insertObject:nullObject atIndex:i];
+// }
+// }
+// }
 //
-//    CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
+// CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
 //
-//    if ( labelArray ) {
-//        id nullObject        = [NSNull null];
-//        NSUInteger lastIndex = idx + numberOfRecords - 1;
-//        for ( NSUInteger i = idx; i <= lastIndex; i++ ) {
-//            [labelArray insertObject:nullObject atIndex:i];
-//        }
-//    }
+// if ( labelArray ) {
+// id nullObject        = [NSNull null];
+// NSUInteger lastIndex = idx + numberOfRecords - 1;
+// for ( NSUInteger i = idx; i <= lastIndex; i++ ) {
+// [labelArray insertObject:nullObject atIndex:i];
+// }
+// }
 //
-//    self.cachedDataCount += numberOfRecords;
-//    [self reloadDataInIndexRange:NSMakeRange(idx, numberOfRecords)];
-//}
+// self.cachedDataCount += numberOfRecords;
+// [self reloadDataInIndexRange:NSMakeRange(idx, numberOfRecords)];
+// }
 
 // added S.Wainwright 21/01/2021
+
 /** @brief Replace records into the plot data cache at the given row index. Accommodates a square of data left to right in columns and down to up in rows
  *  @param idx The starting index of the new row records.
  *  @param numberOfRecords The number of records to insert.
  *  @param columnCount The number of columns.
  *  @param rowCount The number of rows.
  **/
--(void)replaceRowDataShiftDown:(BOOL)shiftDown numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount {  // added S.Wainwright 21/01/2021
-    
+-(void)replaceRowDataShiftDown:(BOOL)shiftDown numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount // added S.Wainwright 21/01/2021
+{
     Class numericClass = [CPTNumericData class];
 
     for ( id key in self.cachedData.allKeys ) {
-        id data = [self.cachedData objectForKey: key];
+        id data = [self.cachedData objectForKey:key];
         if ( [data isKindOfClass:numericClass] ) {
             CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
             size_t sampleSize                  = numericData.sampleBytes;
             size_t length                      = sampleSize * numberOfRecords * columnCount;
-            
+
             int8_t *start      = [numericData mutableSamplePointer:0];
             size_t bytesToMove = numericData.data.length - numberOfRecords * columnCount * sampleSize;
-            if ( (int)bytesToMove > 0 ) {
+            if ((int)bytesToMove > 0 ) {
                 if ( shiftDown ) {
                     memmove(start + length, start, bytesToMove);
                 }
@@ -861,7 +863,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
             }
         }
     }
-    
+
     if ( shiftDown ) {
         [self reloadDataInIndexRange:NSMakeRange(0, numberOfRecords * columnCount)];
     }
@@ -871,116 +873,116 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
 }
 
 //// added S.Wainwright 21/01/2021
-///** @brief Delete records into the plot data cache at the given row index. Accommodates a square of data left to right in columns and down to up in rows
+/// ** @brief Delete records into the plot data cache at the given row index. Accommodates a square of data left to right in columns and down to up in rows
 // *  @param idx The starting index of the new row records.
 // *  @param numberOfRecords The number of records to insert.
 // *  @param columnCount The number of columns.
 // *  @param rowCount The number of rows.
 // **/
-//-(void)deleteRowDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount { // added S.Wainwright 21/01/2021
-//    NSParameterAssert(idx <= rowCount);
-//    Class numericClass = [CPTNumericData class];
+// -(void)deleteRowDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount { // added S.Wainwright 21/01/2021
+// NSParameterAssert(idx <= rowCount);
+// Class numericClass = [CPTNumericData class];
 //
-//    NSRange indexRange = NSMakeRange(idx, numberOfRecords);
+// NSRange indexRange = NSMakeRange(idx, numberOfRecords);
 //
-//    for ( id data in self.cachedData.allValues ) {
-//        if ( [data isKindOfClass:numericClass] ) {
-//            CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
-//            size_t sampleSize                  = numericData.sampleBytes;
-//            int8_t *start                      = [numericData mutableSamplePointer:indexRange.location];
-//            size_t length                      = sampleSize * indexRange.length;
-//            size_t bytesToMove                 = numericData.data.length - (indexRange.location + indexRange.length) * sampleSize;
-//            if ( (int)bytesToMove > 0 ) {
-//                memmove(start, start + length, bytesToMove);
-//            }
+// for ( id data in self.cachedData.allValues ) {
+// if ( [data isKindOfClass:numericClass] ) {
+// CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
+// size_t sampleSize                  = numericData.sampleBytes;
+// int8_t *start                      = [numericData mutableSamplePointer:indexRange.location];
+// size_t length                      = sampleSize * indexRange.length;
+// size_t bytesToMove                 = numericData.data.length - (indexRange.location + indexRange.length) * sampleSize;
+// if ( (int)bytesToMove > 0 ) {
+// memmove(start, start + length, bytesToMove);
+// }
 //
-//            NSMutableData *dataBuffer = (NSMutableData *)numericData.data;
-//            dataBuffer.length -= length;
-//        }
-//        else {
-//            [(NSMutableArray *) data removeObjectsInRange:indexRange];
-//        }
-//    }
+// NSMutableData *dataBuffer = (NSMutableData *)numericData.data;
+// dataBuffer.length -= length;
+// }
+// else {
+// [(NSMutableArray *) data removeObjectsInRange:indexRange];
+// }
+// }
 //
-//    CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
+// CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
 //
-//    NSUInteger maxIndex   = NSMaxRange(indexRange);
-//    Class annotationClass = [CPTAnnotation class];
+// NSUInteger maxIndex   = NSMaxRange(indexRange);
+// Class annotationClass = [CPTAnnotation class];
 //
-//    for ( NSUInteger i = indexRange.location; i < maxIndex; i++ ) {
-//        CPTAnnotation *annotation = labelArray[i];
-//        if ( [annotation isKindOfClass:annotationClass] ) {
-//            [self removeAnnotation:annotation];
-//        }
-//    }
-//    [labelArray removeObjectsInRange:indexRange];
+// for ( NSUInteger i = indexRange.location; i < maxIndex; i++ ) {
+// CPTAnnotation *annotation = labelArray[i];
+// if ( [annotation isKindOfClass:annotationClass] ) {
+// [self removeAnnotation:annotation];
+// }
+// }
+// [labelArray removeObjectsInRange:indexRange];
 //
-//    self.cachedDataCount -= indexRange.length;
-//    [self setNeedsDisplay];
-//}
+// self.cachedDataCount -= indexRange.length;
+// [self setNeedsDisplay];
+// }
 
 //// added S.Wainwright 15/01/2021
-///** @brief Insert records into the plot data cache at the given column index. Accommodates a square of data left to right in columns and down to up in rows
+/// ** @brief Insert records into the plot data cache at the given column index. Accommodates a square of data left to right in columns and down to up in rows
 // *  @param idx The starting index of the new column records.
 // *  @param numberOfRecords The number of records to insert.
 // *  @param columnCount The number of columns.
 // *  @param rowCount The number of rows.
 // **/
-//-(void)insertColumnDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount
-//{
-//    NSParameterAssert(idx <= columnCount);
-//    Class numericClass = [CPTNumericData class];
+// -(void)insertColumnDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount
+// {
+// NSParameterAssert(idx <= columnCount);
+// Class numericClass = [CPTNumericData class];
 //
-//    for ( id data in self.cachedData.allValues ) {
-//        if ( [data isKindOfClass:numericClass] ) {
-//            CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
-//            size_t sampleSize                  = numericData.sampleBytes;
-//            size_t length                      = sampleSize * numberOfRecords;
-//            size_t noRows = rowCount > 0 ? (size_t)rowCount : 1;
+// for ( id data in self.cachedData.allValues ) {
+// if ( [data isKindOfClass:numericClass] ) {
+// CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
+// size_t sampleSize                  = numericData.sampleBytes;
+// size_t length                      = sampleSize * numberOfRecords;
+// size_t noRows = rowCount > 0 ? (size_t)rowCount : 1;
 //
-//            [(NSMutableData *) numericData.data increaseLengthBy:length * rowCount];
-//            size_t lengthEachRow = numericData.data.length / noRows;
+// [(NSMutableData *) numericData.data increaseLengthBy:length * rowCount];
+// size_t lengthEachRow = numericData.data.length / noRows;
 //
-//            for(NSUInteger i = 0; i < rowCount; i++) {
-//                int8_t *start      = [numericData mutableSamplePointer:idx + i * columnCount];
-//                size_t bytesToMove = /*numericData.data.length*/lengthEachRow * (i + 1) - (idx + i * columnCount + numberOfRecords) * sampleSize;
-//                if ( (int)bytesToMove > 0 ) {
-//                    memmove(start + length, start, bytesToMove);
-//                }
-//            }
-//        }
-//        else {
-//            NSMutableArray *array = (NSMutableArray *)data;
-//            NSNull *nullObject    = [NSNull null];
-//            for(NSUInteger i = 0; i < rowCount; i++) {
-//                NSUInteger index = idx + i * columnCount;
-//                for ( NSUInteger j = 0; j <= numberOfRecords; j++ ) {
-//                    [array insertObject:nullObject atIndex:index];
-//                }
-//            }
-//        }
-//    }
+// for(NSUInteger i = 0; i < rowCount; i++) {
+// int8_t *start      = [numericData mutableSamplePointer:idx + i * columnCount];
+// size_t bytesToMove = /*numericData.data.length*/lengthEachRow * (i + 1) - (idx + i * columnCount + numberOfRecords) * sampleSize;
+// if ( (int)bytesToMove > 0 ) {
+// memmove(start + length, start, bytesToMove);
+// }
+// }
+// }
+// else {
+// NSMutableArray *array = (NSMutableArray *)data;
+// NSNull *nullObject    = [NSNull null];
+// for(NSUInteger i = 0; i < rowCount; i++) {
+// NSUInteger index = idx + i * columnCount;
+// for ( NSUInteger j = 0; j <= numberOfRecords; j++ ) {
+// [array insertObject:nullObject atIndex:index];
+// }
+// }
+// }
+// }
 //
-//    CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
+// CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
 //
-//    if ( labelArray ) {
-//        id nullObject        = [NSNull null];
-//        for(NSUInteger i = 0; i < rowCount; i++) {
-//            NSUInteger index = idx + i * columnCount;
-//            for ( NSUInteger j = 0; j <= numberOfRecords; j++ ) {
-//                [labelArray insertObject:nullObject atIndex:index];
-//            }
-//        }
-//    }
+// if ( labelArray ) {
+// id nullObject        = [NSNull null];
+// for(NSUInteger i = 0; i < rowCount; i++) {
+// NSUInteger index = idx + i * columnCount;
+// for ( NSUInteger j = 0; j <= numberOfRecords; j++ ) {
+// [labelArray insertObject:nullObject atIndex:index];
+// }
+// }
+// }
 //
-//    self.cachedDataCount += numberOfRecords * rowCount;
-//    for(NSUInteger i = 0; i < rowCount; i++) {
-//        [self reloadDataInIndexRange:NSMakeRange(idx + i * columnCount, numberOfRecords)];
-//    }
-//}
-
+// self.cachedDataCount += numberOfRecords * rowCount;
+// for(NSUInteger i = 0; i < rowCount; i++) {
+// [self reloadDataInIndexRange:NSMakeRange(idx + i * columnCount, numberOfRecords)];
+// }
+// }
 
 // added S.Wainwright 21/01/2021
+
 /** @brief Replace records into the plot data cache at the given column index. Accommodates a square of data left to right in columns and down to up in rows
  *  @param idx The starting index of the new column records.
  *  @param numberOfRecords The number of records to insert.
@@ -988,24 +990,24 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
  *  @param rowCount The number of rows.
  **/
 
--(void)replaceColumnDataShiftLeft:(BOOL)shiftRight numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount { // added S.Wainwright 21/01/2021
-    
+-(void)replaceColumnDataShiftLeft:(BOOL)shiftRight numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount // added S.Wainwright 21/01/2021
+{
     Class numericClass = [CPTNumericData class];
 
     for ( id key in self.cachedData.allKeys ) {
-        id data = [self.cachedData objectForKey: key];
+        id data = [self.cachedData objectForKey:key];
         if ( [data isKindOfClass:numericClass] ) {
             CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
             size_t sampleSize                  = numericData.sampleBytes;
             size_t length                      = sampleSize * numberOfRecords;
-            
+
             size_t noRows = rowCount > 0 ? (size_t)rowCount : 1;
-//            size_t lengthEachRow = numericData.data.length / noRows; // or columnCount * sampleSize
+// size_t lengthEachRow = numericData.data.length / noRows; // or columnCount * sampleSize
             size_t bytesToMove = numericData.data.length / noRows - numberOfRecords * sampleSize;
-            
-            for(NSUInteger i = 0; i < rowCount; i++) {
-                int8_t *start      = [numericData mutableSamplePointer:i * columnCount];
-                if ( (int)bytesToMove > 0 ) {
+
+            for ( NSUInteger i = 0; i < rowCount; i++ ) {
+                int8_t *start = [numericData mutableSamplePointer:i * columnCount];
+                if ((int)bytesToMove > 0 ) {
                     if ( shiftRight ) {
                         memmove(start + length, start, bytesToMove);
                     }
@@ -1019,10 +1021,10 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
         else {
             NSMutableArray *array = (NSMutableArray *)data;
             NSNull *nullObject    = [NSNull null];
-            for(NSUInteger i = 0; i < rowCount; i++) {
+            for ( NSUInteger i = 0; i < rowCount; i++ ) {
                 if ( !shiftRight ) {
                     NSUInteger startIndex = i * columnCount;
-                    NSUInteger lastIndex = startIndex + numberOfRecords;
+                    NSUInteger lastIndex  = startIndex + numberOfRecords;
                     [array replaceObjectsInRange:NSMakeRange(startIndex + numberOfRecords, columnCount - numberOfRecords) withObjectsFromArray:array range:NSMakeRange(startIndex, columnCount - numberOfRecords)];
                     for ( NSUInteger j = startIndex; j < lastIndex; j++ ) {
                         [array replaceObjectAtIndex:j withObject:nullObject];
@@ -1030,7 +1032,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
                 }
                 else {
                     NSUInteger startIndex = i * columnCount + numberOfRecords;
-                    NSUInteger lastIndex = startIndex + columnCount - numberOfRecords;
+                    NSUInteger lastIndex  = startIndex + columnCount - numberOfRecords;
                     [array replaceObjectsInRange:NSMakeRange(i * columnCount, columnCount - numberOfRecords) withObjectsFromArray:array range:NSMakeRange(startIndex, columnCount - numberOfRecords)];
                     NSUInteger endRowIndex = (i + 1) * columnCount;
                     for ( NSUInteger j = lastIndex; j < endRowIndex; j++ ) {
@@ -1045,11 +1047,11 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
     CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
 
     if ( labelArray ) {
-        id nullObject        = [NSNull null];
-        for(NSUInteger i = 0; i < rowCount; i++) {
+        id nullObject = [NSNull null];
+        for ( NSUInteger i = 0; i < rowCount; i++ ) {
             if ( shiftRight ) {
                 NSUInteger startIndex = i * columnCount;
-                NSUInteger lastIndex = startIndex + numberOfRecords;
+                NSUInteger lastIndex  = startIndex + numberOfRecords;
                 [labelArray replaceObjectsInRange:NSMakeRange(startIndex + numberOfRecords, columnCount - numberOfRecords) withObjectsFromArray:labelArray range:NSMakeRange(startIndex, columnCount - numberOfRecords)];
                 for ( NSUInteger j = startIndex; j < lastIndex; j++ ) {
                     [labelArray replaceObjectAtIndex:j withObject:nullObject];
@@ -1057,7 +1059,7 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
             }
             else {
                 NSUInteger startIndex = i * columnCount + numberOfRecords;
-                NSUInteger lastIndex = startIndex + numberOfRecords;
+                NSUInteger lastIndex  = startIndex + numberOfRecords;
                 [labelArray replaceObjectsInRange:NSMakeRange(i * columnCount, columnCount - numberOfRecords) withObjectsFromArray:labelArray range:NSMakeRange(startIndex, columnCount - numberOfRecords)];
                 NSUInteger endRowIndex = (i + 1) * columnCount;
                 for ( NSUInteger j = lastIndex; j < endRowIndex; j++ ) {
@@ -1068,73 +1070,73 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
     }
 
     if ( shiftRight ) {
-        for(NSUInteger i = 0; i < rowCount; i++) {
+        for ( NSUInteger i = 0; i < rowCount; i++ ) {
             [self reloadDataInIndexRange:NSMakeRange(i * columnCount, numberOfRecords)];
         }
     }
     else {
-        for(NSUInteger i = 0; i < rowCount; i++) {
+        for ( NSUInteger i = 0; i < rowCount; i++ ) {
             [self reloadDataInIndexRange:NSMakeRange(columnCount - numberOfRecords + i * columnCount, numberOfRecords)];
         }
     }
 }
 
 //// added S.Wainwright 20/01/2021
-///** @brief Insert records into the plot data cache at the given column index. Accommodates a square of data left to right in columns and down to up in rows
+/// ** @brief Insert records into the plot data cache at the given column index. Accommodates a square of data left to right in columns and down to up in rows
 // *  @param idx The starting index of the new column records.
 // *  @param numberOfRecords The number of records to insert.
 // *  @param columnCount The number of columns.
 // *  @param rowCount The number of rows.
 // **/
-//-(void)deleteColumnDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount
-//{
-//    NSParameterAssert(idx <= columnCount);
-//    Class numericClass = [CPTNumericData class];
+// -(void)deleteColumnDataAtIndex:(NSUInteger)idx numberOfRecords:(NSUInteger)numberOfRecords columnCount:(NSUInteger)columnCount rowCount:(NSUInteger)rowCount
+// {
+// NSParameterAssert(idx <= columnCount);
+// Class numericClass = [CPTNumericData class];
 //
-//    for ( id data in self.cachedData.allValues ) {
-//        if ( [data isKindOfClass:numericClass] ) {
-//            CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
-//            size_t sampleSize                  = numericData.sampleBytes;
-//            size_t length                      = sampleSize * numberOfRecords;
-//            size_t noRows = rowCount > 0 ? (size_t)rowCount : 1;
-//            size_t lengthEachRow = numericData.data.length / noRows;
-//            
-//            for(NSUInteger i = 0; i < rowCount; i++) {
-//                int8_t *start      = [numericData mutableSamplePointer:idx + i * columnCount];
-//                size_t bytesToMove = /*numericData.data.length*/lengthEachRow * (i + 1) - (idx + i * columnCount + numberOfRecords) * sampleSize;
-//                if ( bytesToMove > 0 ) {
-//                    memmove(start, start + length, bytesToMove);
-//                }
-//            }
+// for ( id data in self.cachedData.allValues ) {
+// if ( [data isKindOfClass:numericClass] ) {
+// CPTMutableNumericData *numericData = (CPTMutableNumericData *)data;
+// size_t sampleSize                  = numericData.sampleBytes;
+// size_t length                      = sampleSize * numberOfRecords;
+// size_t noRows = rowCount > 0 ? (size_t)rowCount : 1;
+// size_t lengthEachRow = numericData.data.length / noRows;
 //
-//            NSMutableData *dataBuffer = (NSMutableData *)numericData.data;
-//            dataBuffer.length -= length * rowCount;
-//        }
-//        else {
-//            NSMutableArray *array = (NSMutableArray *)data;
-//            for(NSUInteger i = 0; i < rowCount; i++) {
-//                NSUInteger index = idx + i * columnCount;
-//                [array removeObjectsInRange:NSMakeRange(index, numberOfRecords)];
+// for(NSUInteger i = 0; i < rowCount; i++) {
+// int8_t *start      = [numericData mutableSamplePointer:idx + i * columnCount];
+// size_t bytesToMove = /*numericData.data.length*/lengthEachRow * (i + 1) - (idx + i * columnCount + numberOfRecords) * sampleSize;
+// if ( bytesToMove > 0 ) {
+// memmove(start, start + length, bytesToMove);
+// }
+// }
+//
+// NSMutableData *dataBuffer = (NSMutableData *)numericData.data;
+// dataBuffer.length -= length * rowCount;
+// }
+// else {
+// NSMutableArray *array = (NSMutableArray *)data;
+// for(NSUInteger i = 0; i < rowCount; i++) {
+// NSUInteger index = idx + i * columnCount;
+// [array removeObjectsInRange:NSMakeRange(index, numberOfRecords)];
 ////                for ( NSUInteger j = 0; j <= numberOfRecords; j++ ) {
 ////                    [array removeObjectAtIndex:index];
 ////                }
-//            }
-//        }
-//    }
+// }
+// }
+// }
 //
-//    CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
-//    if ( labelArray ) {
-//        for(NSUInteger i = 0; i < rowCount; i++) {
-//            NSUInteger index = idx + i * columnCount;
-//            [labelArray removeObjectsInRange:NSMakeRange(index, numberOfRecords)];
+// CPTMutableAnnotationArray *labelArray = self.labelAnnotations;
+// if ( labelArray ) {
+// for(NSUInteger i = 0; i < rowCount; i++) {
+// NSUInteger index = idx + i * columnCount;
+// [labelArray removeObjectsInRange:NSMakeRange(index, numberOfRecords)];
 ////            for ( NSUInteger j = 0; j <= numberOfRecords; j++ ) {
 ////                [labelArray removeObjectAtIndex:index];
 ////            }
-//        }
-//    }
+// }
+// }
 //
-//    self.cachedDataCount -= numberOfRecords * rowCount;
-//}
+// self.cachedDataCount -= numberOfRecords * rowCount;
+// }
 
 /**
  *  @brief Reload all plot data from the data source immediately.
@@ -1173,9 +1175,9 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
  **/
 -(void)reloadDataLabelsInIndexRange:(NSRange)indexRange
 {
-    id<CPTPlotDataSource> theDataSource; //= (id<CPTPlotDataSource>)self.dataSource;
-    
-    if ([self.dataSource isKindOfClass:[CPTFunctionDataSource class]]) {  // Added S.Wainwright
+    id<CPTPlotDataSource> theDataSource; // = (id<CPTPlotDataSource>)self.dataSource;
+
+    if ( [self.dataSource isKindOfClass:[CPTFunctionDataSource class]] ) { // Added S.Wainwright
         theDataSource = (id<CPTPlotDataSource>)self.appearanceDataSource;
     }
     else {
@@ -1850,10 +1852,12 @@ CPTPlotBinding const CPTPlotBindingDataLabels = @"dataLabels"; ///< Plot data la
  **/
 -(nullable id)cachedValueForKey:(nonnull NSString *)key recordIndex:(NSUInteger)idx
 {
-    if(idx < [[self cachedArrayForKey:key] count]) // modified S.Wainwright 02/09/2016
+    if ( idx < [[self cachedArrayForKey:key] count] ) { // modified S.Wainwright 02/09/2016
         return [self cachedArrayForKey:key][idx];
-    else
+    }
+    else {
         return nil;
+    }
 }
 
 /** @brief Copies an array of arbitrary values to the cache.

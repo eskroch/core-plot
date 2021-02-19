@@ -5,23 +5,23 @@
 #import "CPTDefinitions.h"
 #import "CPTExceptions.h"
 #import "CPTFill.h"
+#import "CPTGraphHostingView.h"
 #import "CPTLimitBand.h"
 #import "CPTLineCap.h"
 #import "CPTLineStyle.h"
 #import "CPTMutablePlotRange.h"
-#import "CPTPlotAreaFrame.h"
 #import "CPTPlotArea.h"
+#import "CPTPlotAreaFrame.h"
 #import "CPTPlotSpace.h"
-#import "CPTGraphHostingView.h"
-#import "CPTUtilities.h"
 #import "CPTPolarPlotSpace.h"
+#import "CPTUtilities.h"
 #import "NSCoderExtensions.h"
 #import <tgmath.h>
 
 /// @cond
 @interface CPTPolarAxis()
 
--(void)drawTicksInContext:(nonnull CGContextRef)context atLocations:(nullable CPTNumberSet*)locations withLength:(CGFloat)length inRange:(nullable CPTPlotRange *)labeledRange isMajor:(BOOL)major;
+-(void)drawTicksInContext:(nonnull CGContextRef)context atLocations:(nullable CPTNumberSet *)locations withLength:(CGFloat)length inRange:(nullable CPTPlotRange *)labeledRange isMajor:(BOOL)major;
 
 -(void)orthogonalCoordinateViewLowerBound:(nonnull CGFloat *)lower upperBound:(nonnull CGFloat *)upper;
 -(CGPoint)viewPointForOrthogonalCoordinate:(nullable NSNumber *)orthogonalCoord axisCoordinate:(nullable NSNumber *)coordinateValue;
@@ -85,10 +85,10 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
  **/
 -(nonnull instancetype)initWithFrame:(CGRect)newFrame
 {
-    if ( (self = [super initWithFrame:newFrame]) ) {
-        orthogonalPosition = @0.0;
-        axisConstraints    = nil;
-        self.tickDirection = CPTSignNone;
+    if ((self = [super initWithFrame:newFrame])) {
+        orthogonalPosition  = @0.0;
+        axisConstraints     = nil;
+        self.tickDirection  = CPTSignNone;
         radialLabelLocation = @(NAN);
     }
 
@@ -101,11 +101,11 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
 -(nonnull instancetype)initWithLayer:(id)layer
 {
-    if ( (self = [super initWithLayer:layer]) ) {
+    if ((self = [super initWithLayer:layer])) {
         CPTPolarAxis *theLayer = (CPTPolarAxis *)layer;
 
-        orthogonalPosition = theLayer->orthogonalPosition;
-        axisConstraints = theLayer->axisConstraints;
+        orthogonalPosition  = theLayer->orthogonalPosition;
+        axisConstraints     = theLayer->axisConstraints;
         radialLabelLocation = theLayer->radialLabelLocation;
     }
     return self;
@@ -113,7 +113,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
 -(void)dealloc
 {
-    axisConstraints = nil;
+    axisConstraints     = nil;
     radialLabelLocation = nil;
 }
 
@@ -127,7 +127,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 -(void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    
+
     [coder encodeObject:self.orthogonalPosition forKey:@"CPTPolarAxis.orthogonalPosition"];
     [coder encodeObject:self.axisConstraints forKey:@"CPTPolarAxis.axisConstraints"];
     [coder encodeObject:self.radialLabelLocation forKey:@"CPTPolarAxis.radialLabelLocation"];
@@ -135,10 +135,10 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
 -(nullable instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ( (self = [super initWithCoder:coder]) ) {
-        orthogonalPosition = [coder decodeObjectForKey:@"CPTPolarAxis.orthogonalPosition"];
-        axisConstraints    = [coder decodeObjectForKey:@"CPTPolarAxis.axisConstraints"];
-        radialLabelLocation    = [coder decodeObjectForKey:@"CPTPolarAxis.radialLabelLocation"];
+    if ((self = [super initWithCoder:coder])) {
+        orthogonalPosition  = [coder decodeObjectForKey:@"CPTPolarAxis.orthogonalPosition"];
+        axisConstraints     = [coder decodeObjectForKey:@"CPTPolarAxis.axisConstraints"];
+        radialLabelLocation = [coder decodeObjectForKey:@"CPTPolarAxis.radialLabelLocation"];
     }
     return self;
 }
@@ -155,28 +155,28 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
     CPTCoordinate orthogonalCoordinate = CPTOrthogonalCoordinate(self.coordinate);
     CPTPolarPlotSpace *polarPlotSpace  = (CPTPolarPlotSpace *)self.plotSpace;
     CPTPlotRange *orthogonalRange      = [polarPlotSpace plotRangeForCoordinate:orthogonalCoordinate];
-    
+
     NSAssert(orthogonalRange != nil, @"The orthogonalRange was nil in orthogonalCoordinateViewLowerBound:upperBound:");
-    
+
     CGPoint lowerBoundPoint = [self viewPointForOrthogonalCoordinate:orthogonalRange.location axisCoordinate:@0];
     CGPoint upperBoundPoint = [self viewPointForOrthogonalCoordinate:orthogonalRange.end axisCoordinate:@0];
-    
+
     switch ( self.coordinate ) {
         case CPTCoordinateX:
             *lower = lowerBoundPoint.y;
             *upper = upperBoundPoint.y;
             break;
-            
+
         case CPTCoordinateY:
             *lower = lowerBoundPoint.x;
             *upper = upperBoundPoint.x;
             break;
-            
+
         case CPTCoordinateZ:
             *lower = 0.0;
             *upper = 0.0;
             break;
-            
+
         default:
             *lower = (CGFloat)NAN;
             *upper = (CGFloat)NAN;
@@ -184,50 +184,48 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
     }
 }
 
-
 -(CGPoint)viewPointForOrthogonalCoordinate:(nullable NSNumber *)orthogonalCoord axisCoordinate:(nullable NSNumber *)coordinateValue
 {
-    if(self.coordinate == CPTCoordinateZ) {
-        CPTPlotArea *thePlotArea = self.plotArea;
+    if ( self.coordinate == CPTCoordinateZ ) {
+        CPTPlotArea *thePlotArea   = self.plotArea;
         CPTPlotSpace *thePlotSpace = self.plotSpace;
-        CGPoint originTransformed = [self convertPoint:self.frame.origin fromLayer:thePlotArea];
-        
+        CGPoint originTransformed  = [self convertPoint:self.frame.origin fromLayer:thePlotArea];
+
         NSDecimal centrePlotPoint[2];
         centrePlotPoint[0] = CPTDecimalFromDouble(0.0);
         centrePlotPoint[1] = CPTDecimalFromDouble(0.0);
-        
+
         CGPoint centreViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:centrePlotPoint numberOfCoordinates:2];
         centreViewPoint.x += originTransformed.x;
         centreViewPoint.y += originTransformed.y;
-        
+
         NSDecimal plotPoint[2];
         plotPoint[CPTCoordinateX] = self.radialLabelLocation.decimalValue;
         plotPoint[CPTCoordinateY] = CPTDecimalFromDouble(0.0);
-        
-        CGPoint radialLabelLocationPoint =  [self convertPoint:[self.plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2] fromLayer:thePlotArea];
+
+        CGPoint radialLabelLocationPoint  = [self convertPoint:[self.plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2] fromLayer:thePlotArea];
         CGFloat radialLabelLocationRadius = radialLabelLocationPoint.x - centreViewPoint.x;
-        
+
         CGPoint labelPosition = CGPointMake(radialLabelLocationRadius * (CGFloat)sin([coordinateValue floatValue]) + centreViewPoint.x, radialLabelLocationRadius * (CGFloat)cos([coordinateValue floatValue]) + centreViewPoint.y);
 
         return labelPosition;
     }
-    else
-    {
+    else {
         CPTCoordinate myCoordinate         = self.coordinate;
         CPTCoordinate orthogonalCoordinate = CPTOrthogonalCoordinate(myCoordinate);
-        
+
         NSDecimal plotPoint[2];
         plotPoint[myCoordinate]         = coordinateValue.decimalValue;
         plotPoint[orthogonalCoordinate] = orthogonalCoord.decimalValue;
-        
+
         CPTPlotArea *thePlotArea = self.plotArea;
-        
+
         CGPoint labelPosition = [self convertPoint:[self.plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2] fromLayer:thePlotArea];
         if ( self.coordinate == CPTCoordinateY ) {
             double ratio = CPTDecimalDoubleValue(CPTDecimalDivide(thePlotArea.widthDecimal, thePlotArea.heightDecimal));
             NSDecimal centrePoint[2];
-            centrePoint[0]         = CPTDecimalFromDouble(0.0);
-            centrePoint[1]         = CPTDecimalFromDouble(0.0);
+            centrePoint[0] = CPTDecimalFromDouble(0.0);
+            centrePoint[1] = CPTDecimalFromDouble(0.0);
             CGPoint centrePosition = [self convertPoint:[self.plotSpace plotAreaViewPointForPlotPoint:centrePoint numberOfCoordinates:2] fromLayer:thePlotArea];
             labelPosition.y = (labelPosition.y - centrePosition.y) * ratio + centrePosition.y;
         }
@@ -239,44 +237,44 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 {
     CGPoint point = [self viewPointForOrthogonalCoordinate:self.orthogonalPosition
                                             axisCoordinate:coordinateValue];
-    
+
     CPTConstraints *theAxisConstraints = self.axisConstraints;
-    
+
     if ( theAxisConstraints ) {
         CGFloat lb, ub;
         [self orthogonalCoordinateViewLowerBound:&lb upperBound:&ub];
         CGFloat constrainedPosition = [theAxisConstraints positionForLowerBound:lb upperBound:ub];
-        
+
         switch ( self.coordinate ) {
             case CPTCoordinateX:
                 point.y = constrainedPosition;
                 break;
-                
+
             case CPTCoordinateY:
                 point.x = constrainedPosition;
                 break;
-            
+
             case CPTCoordinateZ:
                 point.x = constrainedPosition;
                 point.y = constrainedPosition;
                 break;
-                
+
             default:
                 break;
         }
     }
-    
+
     if ( isnan(point.x) || isnan(point.y)) {
-        NSLog( @"[CPTPolarAxis viewPointForCoordinateValue:%@] was %@", coordinateValue, CPTStringFromPoint(point) );
-        
-        if ( isnan(point.x) ) {
+        NSLog(@"[CPTPolarAxis viewPointForCoordinateValue:%@] was %@", coordinateValue, CPTStringFromPoint(point));
+
+        if ( isnan(point.x)) {
             point.x = CPTFloat(0.0);
         }
-        if ( isnan(point.y) ) {
+        if ( isnan(point.y)) {
             point.y = CPTFloat(0.0);
         }
     }
-    
+
     return point;
 }
 
@@ -287,80 +285,80 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
 /// @cond
 
--(void)drawTicksInContext:(nonnull CGContextRef)context atLocations:(nullable CPTNumberSet*)locations withLength:(CGFloat)length inRange:(nullable CPTPlotRange *)labeledRange isMajor:(BOOL)major
+-(void)drawTicksInContext:(nonnull CGContextRef)context atLocations:(nullable CPTNumberSet *)locations withLength:(CGFloat)length inRange:(nullable CPTPlotRange *)labeledRange isMajor:(BOOL)major
 {
     CPTLineStyle *lineStyle = (major ? self.majorTickLineStyle : self.minorTickLineStyle);
 
     if ( !lineStyle ) {
         return;
     }
-    
-    CPTPolarPlotSpace *thePlotSpace      = (CPTPolarPlotSpace*)self.plotSpace;
-//        NSSet *locations                     = (major ? self.majorTickLocations : self.minorTickLocations);
-    CPTCoordinate selfCoordinate         = self.coordinate;
-    CPTCoordinate orthogonalCoordinate   = CPTOrthogonalCoordinate(selfCoordinate);
-    
-    NSSet<NSNumber*> *adjustedLocations;
-    if(self.coordinate == CPTCoordinateY)
-    {
-        CPTPlotArea *thePlotArea = self.plotArea;
+
+    CPTPolarPlotSpace *thePlotSpace = (CPTPolarPlotSpace *)self.plotSpace;
+// NSSet *locations                     = (major ? self.majorTickLocations : self.minorTickLocations);
+    CPTCoordinate selfCoordinate       = self.coordinate;
+    CPTCoordinate orthogonalCoordinate = CPTOrthogonalCoordinate(selfCoordinate);
+
+    NSSet<NSNumber *> *adjustedLocations;
+
+    if ( self.coordinate == CPTCoordinateY ) {
+        CPTPlotArea *thePlotArea  = self.plotArea;
         CGPoint originTransformed = [self convertPoint:self.frame.origin fromLayer:thePlotArea];
-        
+
         NSDecimal centrePlotPoint[2];
         centrePlotPoint[0] = CPTDecimalFromDouble(0.0);
         centrePlotPoint[1] = CPTDecimalFromDouble(0.0);
-        
+
         CGPoint centreViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:centrePlotPoint numberOfCoordinates:2];
         centreViewPoint.x += originTransformed.x;
         centreViewPoint.y += originTransformed.y;
-        
+
         CGFloat lineWidth = lineStyle.lineWidth;
-        
+
         CPTAlignPointFunction alignmentFunction = NULL;
-        if ( ( self.contentsScale > CPTFloat(1.0) ) && (round(lineWidth) == lineWidth) ) {
+        if ((self.contentsScale > CPTFloat(1.0)) && (round(lineWidth) == lineWidth)) {
             alignmentFunction = CPTAlignIntegralPointToUserSpace;
         }
         else {
             alignmentFunction = CPTAlignPointToUserSpace;
         }
 
-        centreViewPoint   = alignmentFunction(context, centreViewPoint);
-        CGSize totalSize = CGSizeMake(CPTDecimalDoubleValue(thePlotArea.widthDecimal), CPTDecimalDoubleValue(thePlotArea.heightDecimal));
-        double centreToTopLeft = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)totalSize.height-(double)centreViewPoint.y, 2.0));
-        double centreToTopRight = sqrt(pow((double)totalSize.width-(double)centreViewPoint.x, 2.0) + pow((double)totalSize.height-(double)centreViewPoint.y, 2.0));
-        double centreToBtmRight = sqrt(pow((double)totalSize.width-(double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
-        double centreToBtmLeft = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
-        
+        centreViewPoint = alignmentFunction(context, centreViewPoint);
+        CGSize totalSize        = CGSizeMake(CPTDecimalDoubleValue(thePlotArea.widthDecimal), CPTDecimalDoubleValue(thePlotArea.heightDecimal));
+        double centreToTopLeft  = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)totalSize.height - (double)centreViewPoint.y, 2.0));
+        double centreToTopRight = sqrt(pow((double)totalSize.width - (double)centreViewPoint.x, 2.0) + pow((double)totalSize.height - (double)centreViewPoint.y, 2.0));
+        double centreToBtmRight = sqrt(pow((double)totalSize.width - (double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
+        double centreToBtmLeft  = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
+
         double maxLength = MAX(centreToTopLeft, MAX(centreToTopRight, MAX(centreToBtmRight, centreToBtmLeft)));
-        
+
         NSDecimal startPlotPoint[2];
         startPlotPoint[orthogonalCoordinate] = centrePlotPoint[CPTCoordinateY];
         CGContextBeginPath(context);
-        //CGContextSetStrokeColorWithColor(context, lineStyle.lineColor);
-        
+        // CGContextSetStrokeColorWithColor(context, lineStyle.lineColor);
+
         double ratio = maxLength / MAX(((double)totalSize.width / 2.0), ((double)totalSize.height / 2.0));
-//#if TARGET_OS_IOS
-//        if ( UIInterfaceOrientationIsPortrait([[[[[UIApplication sharedApplication] windows] firstObject] windowScene] interfaceOrientation])) {
-//            ratio = maxLength / ((double)totalSize.width / 2.0);
-//        }
-//        else {
-//            ratio = maxLength / ((double)totalSize.height / 2.0);
-//        }
-//#else
-//        ratio = maxLength / MAX(((double)totalSize.width / 2.0), ((double)totalSize.height / 2.0));
-//#endif
-        if ( thePlotSpace.majorScaleType == CPTScaleTypeLinear || thePlotSpace.majorScaleType == CPTScaleTypeCategory ) {
+// #if TARGET_OS_IOS
+// if ( UIInterfaceOrientationIsPortrait([[[[[UIApplication sharedApplication] windows] firstObject] windowScene] interfaceOrientation])) {
+// ratio = maxLength / ((double)totalSize.width / 2.0);
+// }
+// else {
+// ratio = maxLength / ((double)totalSize.height / 2.0);
+// }
+// #else
+// ratio = maxLength / MAX(((double)totalSize.width / 2.0), ((double)totalSize.height / 2.0));
+// #endif
+        if ((thePlotSpace.majorScaleType == CPTScaleTypeLinear) || (thePlotSpace.majorScaleType == CPTScaleTypeCategory)) {
             ratio *= 1.25;
         }
         else {
             ratio *= pow(10, ceil(ratio));
         }
         // Get plot range
-        
+
         CPTMutablePlotRange *extendedMajorRange = [thePlotSpace.majorRange mutableCopy];
-        NSNumber *factor = [NSNumber numberWithDouble: ratio];
-        [extendedMajorRange expandRangeByFactor: factor];
-        
+        NSNumber *factor                        = [NSNumber numberWithDouble:ratio];
+        [extendedMajorRange expandRangeByFactor:factor];
+
         CPTMutableNumberSet *newMajorLocations = nil;
         CPTMutableNumberSet *newMinorLocations = nil;
 
@@ -395,30 +393,28 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                 newMinorLocations = [[self filteredMinorTickLocations:newMinorLocations] mutableCopy];
         }
 
-        if ( major) {
+        if ( major ) {
             adjustedLocations = newMajorLocations;
         }
         else {
             adjustedLocations = newMinorLocations;
         }
     }
-    else
-    {
+    else {
         adjustedLocations = locations;
     }
 
     [lineStyle setLineStyleInContext:context];
     CGContextBeginPath(context);
 
-    for ( NSDecimalNumber * __strong tickLocation in adjustedLocations )
-    {
-        if(self.coordinate == CPTCoordinateZ && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees) {
-            tickLocation = [tickLocation decimalNumberByMultiplyingBy: (NSDecimalNumber *)[NSDecimalNumber numberWithDouble: M_PI / 180.0]];
+    for ( NSDecimalNumber *__strong tickLocation in adjustedLocations ) {
+        if ((self.coordinate == CPTCoordinateZ) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
+            tickLocation = [tickLocation decimalNumberByMultiplyingBy:(NSDecimalNumber *)[NSDecimalNumber numberWithDouble:M_PI / 180.0]];
         }
         if ( labeledRange && ![labeledRange containsNumber:tickLocation] ) {
             continue;
         }
-        
+
         // Tick end points
         CGPoint baseViewPoint  = [self viewPointForCoordinateValue:tickLocation];
         CGPoint startViewPoint = baseViewPoint;
@@ -440,9 +436,9 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                 endFactor   = CPTFloat(0.5);
                 break;
 
-//            default:
-//                NSLog(@"Invalid sign in [CPTPolarAxis drawTicksInContext:]");
-//                break;
+// default:
+// NSLog(@"Invalid sign in [CPTPolarAxis drawTicksInContext:]");
+// break;
         }
 
         switch ( self.coordinate ) {
@@ -455,14 +451,13 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                 startViewPoint.x += length * startFactor;
                 endViewPoint.x   += length * endFactor;
                 break;
-            
+
             case CPTCoordinateZ:
                 startViewPoint.x += length * startFactor * sin(tickLocation.doubleValue);
                 startViewPoint.y += length * startFactor * cos(tickLocation.doubleValue);
-                endViewPoint.x   += length * endFactor* sin(tickLocation.doubleValue);
+                endViewPoint.x   += length * endFactor * sin(tickLocation.doubleValue);
                 endViewPoint.y   += length * endFactor * cos(tickLocation.doubleValue);
                 break;
-
 
             default:
                 NSLog(@"Invalid coordinate in [CPTPolarAxis drawTicksInContext:]");
@@ -492,6 +487,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
     CPTPlotRange *thePlotRange    = [self.plotSpace plotRangeForCoordinate:self.coordinate];
     CPTMutablePlotRange *range    = [thePlotRange mutableCopy];
     CPTPlotRange *theVisibleRange = self.visibleRange;
+
     if ( theVisibleRange ) {
         [range intersectionPlotRange:theVisibleRange];
     }
@@ -526,7 +522,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
             range = [theVisibleAxisRange mutableCopy];
         }
         CPTAlignPointFunction alignmentFunction = CPTAlignPointToUserSpace;
-        if ( theLineStyle && self.coordinate != CPTCoordinateZ ) {
+        if ( theLineStyle && (self.coordinate != CPTCoordinateZ)) {
             CGPoint startViewPoint = alignmentFunction(context, [self viewPointForCoordinateValue:range.location]);
             CGPoint endViewPoint   = alignmentFunction(context, [self viewPointForCoordinateValue:range.end]);
             [theLineStyle setLineStyleInContext:context];
@@ -540,17 +536,16 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
         if ( minCap || maxCap ) {
             switch ( self.coordinate ) {
                 case CPTCoordinateX:
-                    axisDirection = ( range.lengthDouble >= 0.0) ? CPTPointMake(1.0, 0.0) : CPTPointMake(-1.0, 0.0);
+                    axisDirection = (range.lengthDouble >= 0.0) ? CPTPointMake(1.0, 0.0) : CPTPointMake(-1.0, 0.0);
                     break;
 
                 case CPTCoordinateY:
-                    axisDirection = ( range.lengthDouble >= 0.0) ? CPTPointMake(0.0, 1.0) : CPTPointMake(0.0, -1.0);
-                    break;
-                    
-                case CPTCoordinateZ:
-                    axisDirection = ( range.lengthDouble >= 0.0) ? CPTPointMake(0.0, 1.0) : CPTPointMake(0.0, -1.0);
+                    axisDirection = (range.lengthDouble >= 0.0) ? CPTPointMake(0.0, 1.0) : CPTPointMake(0.0, -1.0);
                     break;
 
+                case CPTCoordinateZ:
+                    axisDirection = (range.lengthDouble >= 0.0) ? CPTPointMake(0.0, 1.0) : CPTPointMake(0.0, -1.0);
+                    break;
 
                 default:
                     break;
@@ -561,7 +556,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
             CGPoint viewPoint = alignmentFunction(context, [self viewPointForCoordinateValue:range.minLimit]);
             [minCap renderAsVectorInContext:context atPoint:viewPoint inDirection:CPTPointMake(-axisDirection.x, -axisDirection.y)];
         }
-        
+
         if ( maxCap ) {
             CGPoint viewPoint = alignmentFunction(context, [self viewPointForCoordinateValue:range.maxLimit]);
             [maxCap renderAsVectorInContext:context atPoint:viewPoint inDirection:axisDirection];
@@ -587,8 +582,8 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
         [self relabel];
 
-        CPTPolarPlotSpace *thePlotSpace      = (CPTPolarPlotSpace*)self.plotSpace;
-//        NSSet *locations                     = (major ? self.majorTickLocations : self.minorTickLocations);
+        CPTPolarPlotSpace *thePlotSpace = (CPTPolarPlotSpace *)self.plotSpace;
+// NSSet *locations                     = (major ? self.majorTickLocations : self.minorTickLocations);
         CPTCoordinate selfCoordinate         = self.coordinate;
         CPTCoordinate orthogonalCoordinate   = CPTOrthogonalCoordinate(selfCoordinate);
         CPTMutablePlotRange *orthogonalRange = [[thePlotSpace plotRangeForCoordinate:orthogonalCoordinate] mutableCopy];
@@ -615,70 +610,69 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
             [orthogonalRange intersectionPlotRange:theGridLineRange];
         }
 
-        CPTPlotArea *thePlotArea = self.plotArea;
+        CPTPlotArea *thePlotArea  = self.plotArea;
         CGPoint originTransformed = [self convertPoint:self.frame.origin fromLayer:thePlotArea];
-        
+
         NSDecimal centrePlotPoint[2];
         centrePlotPoint[0] = CPTDecimalFromDouble(0.0);
         centrePlotPoint[1] = CPTDecimalFromDouble(0.0);
-        
+
         CGPoint centreViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:centrePlotPoint numberOfCoordinates:2];
         centreViewPoint.x += originTransformed.x;
         centreViewPoint.y += originTransformed.y;
-        
+
         // Stroke grid lines
         [lineStyle setLineStyleInContext:context];
-        
+
         CGFloat lineWidth = lineStyle.lineWidth;
-        
+
         CPTAlignPointFunction alignmentFunction = NULL;
-        if ( ( self.contentsScale > CPTFloat(1.0) ) && (round(lineWidth) == lineWidth) ) {
+        if ((self.contentsScale > CPTFloat(1.0)) && (round(lineWidth) == lineWidth)) {
             alignmentFunction = CPTAlignIntegralPointToUserSpace;
         }
         else {
             alignmentFunction = CPTAlignPointToUserSpace;
         }
 
-        centreViewPoint   = alignmentFunction(context, centreViewPoint);
-        CGSize totalSize = CGSizeMake(CPTDecimalDoubleValue(thePlotArea.widthDecimal), CPTDecimalDoubleValue(thePlotArea.heightDecimal));
-        double centreToTopLeft = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)totalSize.height-(double)centreViewPoint.y, 2.0));
-        double centreToTopRight = sqrt(pow((double)totalSize.width-(double)centreViewPoint.x, 2.0) + pow((double)totalSize.height-(double)centreViewPoint.y, 2.0));
-        double centreToBtmRight = sqrt(pow((double)totalSize.width-(double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
-        double centreToBtmLeft = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
-        
+        centreViewPoint = alignmentFunction(context, centreViewPoint);
+        CGSize totalSize        = CGSizeMake(CPTDecimalDoubleValue(thePlotArea.widthDecimal), CPTDecimalDoubleValue(thePlotArea.heightDecimal));
+        double centreToTopLeft  = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)totalSize.height - (double)centreViewPoint.y, 2.0));
+        double centreToTopRight = sqrt(pow((double)totalSize.width - (double)centreViewPoint.x, 2.0) + pow((double)totalSize.height - (double)centreViewPoint.y, 2.0));
+        double centreToBtmRight = sqrt(pow((double)totalSize.width - (double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
+        double centreToBtmLeft  = sqrt(pow((double)centreViewPoint.x, 2.0) + pow((double)centreViewPoint.y, 2.0));
+
         double maxLength = MAX(centreToTopLeft, MAX(centreToTopRight, MAX(centreToBtmRight, centreToBtmLeft)));
-        
+
         NSDecimal startPlotPoint[2];
-        
-        if(selfCoordinate == CPTCoordinateX)
-        {
+
+        if ( selfCoordinate == CPTCoordinateX ) {
             startPlotPoint[orthogonalCoordinate] = centrePlotPoint[CPTCoordinateY];
-            CGContextBeginPath(context);               
-            //CGContextSetStrokeColorWithColor(context, lineStyle.lineColor);
-            
+            CGContextBeginPath(context);
+            // CGContextSetStrokeColorWithColor(context, lineStyle.lineColor);
+
             double ratio = maxLength / MAX(((double)totalSize.width / 2.0), ((double)totalSize.height / 2.0));
-//#if TARGET_OS_IOS
-//            if ( UIInterfaceOrientationIsPortrait([[[[[UIApplication sharedApplication] windows] firstObject] windowScene] interfaceOrientation])) {
-//                ratio = maxLength / ((double)totalSize.width / 2.0);
-//            }
-//                else {
-//                ratio = maxLength / ((double)totalSize.height / 2.0);
-//            }
-//#else
-//            ratio = maxLength / MAX(((double)totalSize.width / 2.0), ((double)totalSize.height / 2.0));         
-//#endif
-            if ( thePlotSpace.majorScaleType == CPTScaleTypeLinear || thePlotSpace.majorScaleType == CPTScaleTypeCategory ) {
+// #if TARGET_OS_IOS
+// if ( UIInterfaceOrientationIsPortrait([[[[[UIApplication sharedApplication] windows] firstObject] windowScene] interfaceOrientation])) {
+// ratio = maxLength / ((double)totalSize.width / 2.0);
+// }
+// else {
+// ratio = maxLength / ((double)totalSize.height / 2.0);
+// }
+// #else
+// ratio = maxLength / MAX(((double)totalSize.width / 2.0), ((double)totalSize.height / 2.0));
+// #endif
+            if ((thePlotSpace.majorScaleType == CPTScaleTypeLinear) || (thePlotSpace.majorScaleType == CPTScaleTypeCategory)) {
                 ratio *= 1.25;
             }
             else {
                 ratio *= pow(10, ceil(ratio));
             }
             // Get plot range
-            
+
             CPTMutablePlotRange *extendedMajorRange = [thePlotSpace.majorRange mutableCopy];
-            NSNumber *factor = [NSNumber numberWithDouble: ratio];
-            [extendedMajorRange expandRangeByFactor: factor];
-            
+            NSNumber *factor                        = [NSNumber numberWithDouble:ratio];
+            [extendedMajorRange expandRangeByFactor:factor];
+
             CPTMutableNumberSet *newMajorLocations = nil;
             CPTMutableNumberSet *newMinorLocations = nil;
 
@@ -713,78 +707,74 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                     newMinorLocations = [[self filteredMinorTickLocations:newMinorLocations] mutableCopy];
             }
 
-            
             NSSet *locations;
-            if ( major) {
+            if ( major ) {
                 locations = newMajorLocations;
             }
             else {
                 locations = newMinorLocations;
             }
-            
-            for ( NSDecimalNumber *location in locations )
-            {
+
+            for ( NSDecimalNumber *location in locations ) {
                 NSDecimal locationDecimal = location.decimalValue;
-                
+
                 if ( labeledRange && ![labeledRange contains:locationDecimal] ) {
                     continue;
                 }
-           
-                startPlotPoint[selfCoordinate] = locationDecimal;
+
+                startPlotPoint[selfCoordinate]       = locationDecimal;
                 startPlotPoint[orthogonalCoordinate] = [[NSDecimalNumber numberWithDouble:0.0] decimalValue];
                 // Start point
                 CGPoint startViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:startPlotPoint numberOfCoordinates:2];
                 startViewPoint.x += originTransformed.x;
                 startViewPoint.y += originTransformed.y;
-                
+
                 // Align to pixels
                 startViewPoint = alignmentFunction(context, startViewPoint);
-                
+
                 double diameter = 2.0 * (double)(startViewPoint.x - centreViewPoint.x);
-                CGContextStrokeEllipseInRect(context, CGRectMake(-(CGFloat)0.5*(CGFloat)diameter+(CGFloat)centreViewPoint.x, -(CGFloat)0.5*(CGFloat)diameter+(CGFloat)centreViewPoint.y, (CGFloat)diameter, (CGFloat)diameter));
-                
+                CGContextStrokeEllipseInRect(context, CGRectMake(-(CGFloat)0.5 * (CGFloat)diameter + (CGFloat)centreViewPoint.x, -(CGFloat)0.5 * (CGFloat)diameter + (CGFloat)centreViewPoint.y, (CGFloat)diameter, (CGFloat)diameter));
+
                 CGContextStrokePath(context);
             }
         }
-        else if(selfCoordinate == CPTCoordinateY)
-        {
-            ;
+        else if ( selfCoordinate == CPTCoordinateY ) {
         }
-        else if(selfCoordinate == CPTCoordinateZ)
-        {
+        else if ( selfCoordinate == CPTCoordinateZ ) {
             CGContextBeginPath(context);
-            //Base lines
-            
-            double maxSize = maxLength * 1.25;//orthogonalRange.lengthDouble;
+            // Base lines
+
+            double maxSize       = maxLength * 1.25; // orthogonalRange.lengthDouble;
             CGPoint endViewPoint = CGPointZero;
-            double mvr = [self.majorIntervalLength doubleValue];
-            if(thePlotSpace.radialAngleOption == CPTPolarRadialAngleModeDegrees)
-                mvr*= (M_PI/180.0);
-                
-            if(!major)
+            double mvr           = [self.majorIntervalLength doubleValue];
+            if ( thePlotSpace.radialAngleOption == CPTPolarRadialAngleModeDegrees ) {
+                mvr *= (M_PI / 180.0);
+            }
+
+            if ( !major ) {
                 mvr /= (self.minorTicksPerInterval + 1);
-            int noRadialLines = (int)(2.0*M_PI / mvr);
-            for (int i = 0; i < noRadialLines; i++)
-            {
+            }
+            int noRadialLines = (int)(2.0 * M_PI / mvr);
+            for ( int i = 0; i < noRadialLines; i++ ) {
                 double a = (mvr * (double)i) - M_PI_2;
                 double x = maxSize * cos(a);
                 double y = maxSize * sin(a);
-                
+
                 CGContextMoveToPoint(context, centreViewPoint.x, centreViewPoint.y);
-                
+
                 // End point
                 endViewPoint.x = (CGFloat)x;
                 endViewPoint.y = (CGFloat)y;
-                
+
                 // Align to pixels
                 endViewPoint = CPTAlignPointToUserSpace(context, endViewPoint);
-                
-                CGContextAddLineToPoint(context, centreViewPoint.x + endViewPoint.x , centreViewPoint.y + endViewPoint.y);
+
+                CGContextAddLineToPoint(context, centreViewPoint.x + endViewPoint.x, centreViewPoint.y + endViewPoint.y);
                 CGContextStrokePath(context);
             }
         }
         orthogonalRange = nil;
-        labeledRange = nil;
+        labeledRange    = nil;
     }
 }
 
@@ -895,14 +885,14 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 -(void)drawBackgroundBandsInContext:(nonnull CGContextRef)context
 {
     CPTFillArray *bandArray = self.alternatingBandFills;
-    NSUInteger bandCount   = bandArray.count;
-    
+    NSUInteger bandCount    = bandArray.count;
+
     if ( bandCount > 0 ) {
         CPTNumberArray *locations = [self.majorTickLocations allObjects];
-        
+
         if ( locations.count > 0 ) {
             CPTPlotSpace *thePlotSpace = self.plotSpace;
-            
+
             CPTCoordinate selfCoordinate = self.coordinate;
             CPTMutablePlotRange *range   = [[thePlotSpace plotRangeForCoordinate:selfCoordinate] mutableCopy];
             if ( range ) {
@@ -911,19 +901,19 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                     [range intersectionPlotRange:theVisibleRange];
                 }
             }
-            
+
             CPTCoordinate orthogonalCoordinate   = CPTOrthogonalCoordinate(selfCoordinate);
             CPTMutablePlotRange *orthogonalRange = [[thePlotSpace plotRangeForCoordinate:orthogonalCoordinate] mutableCopy];
             CPTPlotRange *theGridLineRange       = self.gridLinesRange;
-            
+
             if ( theGridLineRange ) {
                 [orthogonalRange intersectionPlotRange:theGridLineRange];
             }
-            
+
             NSDecimal zero                   = CPTDecimalFromInteger(0);
             NSSortDescriptor *sortDescriptor = nil;
             if ( range ) {
-                if ( CPTDecimalGreaterThanOrEqualTo(range.lengthDecimal, zero) ) {
+                if ( CPTDecimalGreaterThanOrEqualTo(range.lengthDecimal, zero)) {
                     sortDescriptor = [[NSSortDescriptor alloc] initWithKey:nil ascending:YES];
                 }
                 else {
@@ -934,7 +924,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                 sortDescriptor = [[NSSortDescriptor alloc] initWithKey:nil ascending:YES];
             }
             locations = [locations sortedArrayUsingDescriptors:@[sortDescriptor]];
-            
+
             NSUInteger bandIndex = 0;
             id null              = [NSNull null];
             NSDecimal lastLocation;
@@ -944,7 +934,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
             else {
                 lastLocation = CPTDecimalNaN();
             }
-            
+
             NSDecimal startPlotPoint[2];
             NSDecimal endPlotPoint[2];
             if ( orthogonalRange ) {
@@ -955,34 +945,34 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                 startPlotPoint[orthogonalCoordinate] = CPTDecimalNaN();
                 endPlotPoint[orthogonalCoordinate]   = CPTDecimalNaN();
             }
-            
+
             for ( NSDecimalNumber *location in locations ) {
                 NSDecimal currentLocation = [location decimalValue];
-                if ( !CPTDecimalEquals(CPTDecimalSubtract(currentLocation, lastLocation), zero) ) {
+                if ( !CPTDecimalEquals(CPTDecimalSubtract(currentLocation, lastLocation), zero)) {
                     CPTFill *bandFill = bandArray[bandIndex++];
                     bandIndex %= bandCount;
-                    
+
                     if ( bandFill != null ) {
                         // Start point
                         startPlotPoint[selfCoordinate] = currentLocation;
                         CGPoint startViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:startPlotPoint numberOfCoordinates:2];
-                        
+
                         // End point
                         endPlotPoint[selfCoordinate] = lastLocation;
                         CGPoint endViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:endPlotPoint numberOfCoordinates:2];
-                        
+
                         // Fill band
-                        CGRect fillRect = CPTRectMake( MIN(startViewPoint.x, endViewPoint.x),
+                        CGRect fillRect = CPTRectMake(MIN(startViewPoint.x, endViewPoint.x),
                                                       MIN(startViewPoint.y, endViewPoint.y),
                                                       ABS(endViewPoint.x - startViewPoint.x),
-                                                      ABS(endViewPoint.y - startViewPoint.y) );
+                                                      ABS(endViewPoint.y - startViewPoint.y));
                         [bandFill fillRect:CPTAlignIntegralRectToUserSpace(context, fillRect) inContext:context];
                     }
                 }
-                
+
                 lastLocation = currentLocation;
             }
-            
+
             // Fill space between last location and the range end
             NSDecimal endLocation;
             if ( range ) {
@@ -991,23 +981,23 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
             else {
                 endLocation = CPTDecimalNaN();
             }
-            if ( !CPTDecimalEquals(lastLocation, endLocation) ) {
+            if ( !CPTDecimalEquals(lastLocation, endLocation)) {
                 CPTFill *bandFill = bandArray[bandIndex];
-                
+
                 if ( bandFill != null ) {
                     // Start point
                     startPlotPoint[selfCoordinate] = endLocation;
                     CGPoint startViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:startPlotPoint numberOfCoordinates:2];
-                    
+
                     // End point
                     endPlotPoint[selfCoordinate] = lastLocation;
                     CGPoint endViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:endPlotPoint numberOfCoordinates:2];
-                    
+
                     // Fill band
-                    CGRect fillRect = CPTRectMake( MIN(startViewPoint.x, endViewPoint.x),
+                    CGRect fillRect = CPTRectMake(MIN(startViewPoint.x, endViewPoint.x),
                                                   MIN(startViewPoint.y, endViewPoint.y),
                                                   ABS(endViewPoint.x - startViewPoint.x),
-                                                  ABS(endViewPoint.y - startViewPoint.y) );
+                                                  ABS(endViewPoint.y - startViewPoint.y));
                     [bandFill fillRect:CPTAlignIntegralRectToUserSpace(context, fillRect) inContext:context];
                 }
             }
@@ -1018,54 +1008,54 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 -(void)drawBackgroundLimitsInContext:(nonnull CGContextRef)context
 {
     CPTLimitBandArray *limitArray = self.backgroundLimitBands;
-    
+
     if ( limitArray.count > 0 ) {
         CPTPlotSpace *thePlotSpace = self.plotSpace;
-        
+
         CPTCoordinate selfCoordinate = self.coordinate;
         CPTMutablePlotRange *range   = [[thePlotSpace plotRangeForCoordinate:selfCoordinate] mutableCopy];
-        
+
         if ( range ) {
             CPTPlotRange *theVisibleRange = self.visibleRange;
             if ( theVisibleRange ) {
                 [range intersectionPlotRange:theVisibleRange];
             }
         }
-        
+
         CPTCoordinate orthogonalCoordinate   = CPTOrthogonalCoordinate(selfCoordinate);
         CPTMutablePlotRange *orthogonalRange = [[thePlotSpace plotRangeForCoordinate:orthogonalCoordinate] mutableCopy];
         CPTPlotRange *theGridLineRange       = self.gridLinesRange;
-        
+
         if ( theGridLineRange ) {
             [orthogonalRange intersectionPlotRange:theGridLineRange];
         }
-        
+
         NSDecimal startPlotPoint[2];
         NSDecimal endPlotPoint[2];
         startPlotPoint[orthogonalCoordinate] = orthogonalRange.locationDecimal;
         endPlotPoint[orthogonalCoordinate]   = orthogonalRange.endDecimal;
-        
+
         for ( CPTLimitBand *band in self.backgroundLimitBands ) {
             CPTFill *bandFill = band.fill;
-            
+
             if ( bandFill ) {
                 CPTMutablePlotRange *bandRange = [band.range mutableCopy];
                 if ( bandRange ) {
                     [bandRange intersectionPlotRange:range];
-                    
+
                     // Start point
                     startPlotPoint[selfCoordinate] = bandRange.locationDecimal;
                     CGPoint startViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:startPlotPoint numberOfCoordinates:2];
-                    
+
                     // End point
                     endPlotPoint[selfCoordinate] = bandRange.endDecimal;
                     CGPoint endViewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:endPlotPoint numberOfCoordinates:2];
-                    
+
                     // Fill band
-                    CGRect fillRect = CPTRectMake( MIN(startViewPoint.x, endViewPoint.x),
+                    CGRect fillRect = CPTRectMake(MIN(startViewPoint.x, endViewPoint.x),
                                                   MIN(startViewPoint.y, endViewPoint.y),
                                                   ABS(endViewPoint.x - startViewPoint.x),
-                                                  ABS(endViewPoint.y - startViewPoint.y) );
+                                                  ABS(endViewPoint.y - startViewPoint.y));
                     [bandFill fillRect:CPTAlignIntegralRectToUserSpace(context, fillRect) inContext:context];
                 }
             }
@@ -1085,14 +1075,13 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
     CPTPlotRange *range    = [self.plotSpace plotRangeForCoordinate:self.coordinate];
     CGPoint startViewPoint = [self viewPointForCoordinateValue:range.location];
     CGPoint endViewPoint   = [self viewPointForCoordinateValue:range.end];
-    
+
     return [NSString stringWithFormat:@"<%@ with range: %@ viewCoordinates: %@ to %@>",
             [super description],
             range,
             CPTStringFromPoint(startViewPoint),
             CPTStringFromPoint(endViewPoint)];
 }
-
 
 /// @endcond
 
@@ -1104,18 +1093,18 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 -(CGFloat)tickOffset
 {
     CGFloat offset = CPTFloat(0.0);
-    
+
     switch ( self.tickDirection ) {
         case CPTSignNone:
             offset += self.majorTickLength * CPTFloat(0.5);
             break;
-            
+
         case CPTSignPositive:
         case CPTSignNegative:
             offset += self.majorTickLength;
             break;
     }
-    
+
     return offset;
 }
 
@@ -1126,51 +1115,51 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
 /// @cond
 
-
 // Center title in the plot range by default
 -(nonnull NSNumber *)defaultRadialLabelLocation
 {
-    if(self.coordinate != CPTCoordinateZ)
+    if ( self.coordinate != CPTCoordinateZ ) {
         return @0;
-    
+    }
+
     NSNumber *location;
-    
+
     CPTPlotSpace *thePlotSpace  = self.plotSpace;
     CPTCoordinate theCoordinate = self.coordinate;
-    
+
     CPTPlotRange *axisRange = [thePlotSpace plotRangeForCoordinate:CPTCoordinateX];
-    
+
     if ( axisRange ) {
         CPTScaleType scaleType = [thePlotSpace scaleTypeForCoordinate:theCoordinate];
-        
+
         switch ( scaleType ) {
             case CPTScaleTypeLinear:
                 location = [NSNumber numberWithDouble:[axisRange.midPoint doubleValue] + axisRange.lengthDouble / 2.0];
                 break;
-                
+
             case CPTScaleTypeLog:
             {
                 double loc = axisRange.locationDouble;
                 double end = axisRange.endDouble;
-                
-                if ( (loc > 0.0) && (end >= 0.0) ) {
-                    location = @( pow(10.0, ( log10(loc) + log10(end) ) / 4.0) );
+
+                if ((loc > 0.0) && (end >= 0.0)) {
+                    location = @(pow(10.0, (log10(loc) + log10(end)) / 4.0));
                 }
                 else {
                     location = [NSNumber numberWithDouble:[axisRange.midPoint doubleValue] + axisRange.lengthDouble / 2.0];
                 }
             }
-                break;
-                
+            break;
+
             case CPTScaleTypeLogModulus:
             {
                 double loc = axisRange.locationDouble;
                 double end = axisRange.endDouble;
-                
-                location = @( CPTInverseLogModulus( ( CPTLogModulus(loc) + CPTLogModulus(end) ) / 2.0 ) );
+
+                location = @(CPTInverseLogModulus((CPTLogModulus(loc) + CPTLogModulus(end)) / 2.0));
             }
-                break;
-                
+            break;
+
             default:
                 location = [NSNumber numberWithDouble:[axisRange.midPoint doubleValue] + axisRange.lengthDouble / 2.0];
                 break;
@@ -1179,7 +1168,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
     else {
         location = @0;
     }
-    
+
     return location;
 }
 
@@ -1196,7 +1185,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
  *  @param newMajorLocations A new NSSet containing the major tick locations.
  *  @param newMinorLocations A new NSSet containing the minor tick locations.
  */
--(void)generateFixedIntervalMajorTickLocations:(CPTNumberSet *__autoreleasing *)newMajorLocations minorTickLocations:(CPTNumberSet *__autoreleasing *)newMinorLocations plotRange:(CPTPlotRange*)plotRange
+-(void)generateFixedIntervalMajorTickLocations:(CPTNumberSet *__autoreleasing *)newMajorLocations minorTickLocations:(CPTNumberSet *__autoreleasing *)newMinorLocations plotRange:(CPTPlotRange *)plotRange
 {
     CPTMutableNumberSet *majorLocations = [NSMutableSet set];
     CPTMutableNumberSet *minorLocations = [NSMutableSet set];
@@ -1276,7 +1265,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
  *  @param newMajorLocations A new NSSet containing the major tick locations.
  *  @param newMinorLocations A new NSSet containing the minor tick locations.
  */
--(void)autoGenerateMajorTickLocations:(CPTNumberSet *__autoreleasing *)newMajorLocations minorTickLocations:(CPTNumberSet *__autoreleasing *)newMinorLocations plotRange:(CPTPlotRange*)plotRange
+-(void)autoGenerateMajorTickLocations:(CPTNumberSet *__autoreleasing *)newMajorLocations minorTickLocations:(CPTNumberSet *__autoreleasing *)newMinorLocations plotRange:(CPTPlotRange *)plotRange
 {
     // Create sets for locations
     CPTMutableNumberSet *majorLocations = [NSMutableSet set];
@@ -1301,13 +1290,13 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
         case CPTScaleTypeLog:
             // supported scale type--check range
-            if ([self isKindOfClass:[CPTPolarAxis class]]) { // added S.Wainwright 2/12/2020
-                if ( (range.minLimitDouble == 0.0) || (range.maxLimitDouble == 0.0) ) {
+            if ( [self isKindOfClass:[CPTPolarAxis class]] ) { // added S.Wainwright 2/12/2020
+                if ((range.minLimitDouble == 0.0) || (range.maxLimitDouble == 0.0)) {
                     valid = NO;
                 }
             }
             else {
-                if ( (range.minLimitDouble <= 0.0) || (range.maxLimitDouble <= 0.0) ) {
+                if ((range.minLimitDouble <= 0.0) || (range.maxLimitDouble <= 0.0)) {
                     valid = NO;
                 }
             }
@@ -1422,10 +1411,11 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                 double maxLimit = range.maxLimitDouble;
 
                 // added S.Wainwright 2/12/2020
+
                 /*if ( (minLimit != 0.0) && (maxLimit != 0.0) && [self isKindOfClass:[CPTPolarAxis class]]) {
-                    
-                }
-                else*/ if ((minLimit > 0.0) && (maxLimit > 0.0)) {
+                 *
+                 * }
+                 * else*/if ((minLimit > 0.0) && (maxLimit > 0.0)) {
                     // Determine interval value
                     length = log10(maxLimit / minLimit);
 
@@ -1582,7 +1572,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
  *  @param newMajorLocations A new NSSet containing the major tick locations.
  *  @param newMinorLocations A new NSSet containing the minor tick locations.
  */
--(void)generateEqualMajorTickLocations:(CPTNumberSet *__autoreleasing *)newMajorLocations minorTickLocations:(CPTNumberSet *__autoreleasing *)newMinorLocations plotRange:(CPTPlotRange*)plotRange
+-(void)generateEqualMajorTickLocations:(CPTNumberSet *__autoreleasing *)newMajorLocations minorTickLocations:(CPTNumberSet *__autoreleasing *)newMinorLocations plotRange:(CPTPlotRange *)plotRange
 {
     CPTMutableNumberSet *majorLocations = [NSMutableSet set];
     CPTMutableNumberSet *minorLocations = [NSMutableSet set];
@@ -1708,20 +1698,20 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
     }
 }
 
-//-(void)setOrthogonalPosition:(nullable NSNumber *)newPosition
-//{
-//    BOOL needsUpdate = YES;
-//    
-//    if ( newPosition ) {
-//        needsUpdate = ![orthogonalPosition isEqualToNumber:newPosition];
-//    }
-//    
-//    if ( needsUpdate ) {
-//        orthogonalPosition = newPosition;
-//        [self setNeedsDisplay];
-//        [self setNeedsLayout];
-//    }
-//}
+// -(void)setOrthogonalPosition:(nullable NSNumber *)newPosition
+// {
+// BOOL needsUpdate = YES;
+//
+// if ( newPosition ) {
+// needsUpdate = ![orthogonalPosition isEqualToNumber:newPosition];
+// }
+//
+// if ( needsUpdate ) {
+// orthogonalPosition = newPosition;
+// [self setNeedsDisplay];
+// [self setNeedsLayout];
+// }
+// }
 
 -(void)setCoordinate:(CPTCoordinate)newCoordinate
 {
@@ -1735,13 +1725,13 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                     case CPTAlignmentRight:
                         // ok--do nothing
                         break;
-                        
+
                     default:
                         self.labelAlignment = CPTAlignmentCenter;
                         break;
                 }
                 break;
-                
+
             case CPTCoordinateY:
                 switch ( self.labelAlignment ) {
                     case CPTAlignmentTop:
@@ -1749,12 +1739,13 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                     case CPTAlignmentBottom:
                         // ok--do nothing
                         break;
-                        
+
                     default:
                         self.labelAlignment = CPTAlignmentMiddle;
                         break;
                 }
                 break;
+
             case CPTCoordinateZ:
                 switch ( self.labelAlignment ) {
                     case CPTAlignmentTop:
@@ -1762,14 +1753,13 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
                     case CPTAlignmentBottom:
                         // ok--do nothing
                         break;
-                        
+
                     default:
                         self.labelAlignment = CPTAlignmentMiddle;
                         break;
                 }
                 break;
 
-                
             default:
                 [NSException raise:NSInvalidArgumentException format:@"Invalid coordinate: %lu", (unsigned long)newCoordinate];
                 break;
@@ -1780,12 +1770,12 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 -(void)setRadialLabelLocation:(nullable NSNumber *)newLocation
 {
     BOOL needsUpdate = YES;
-    
+
     if ( newLocation ) {
         NSNumber *location = newLocation;
         needsUpdate = ![radialLabelLocation isEqualToNumber:location];
     }
-    
+
     if ( needsUpdate ) {
         radialLabelLocation = newLocation;
         [self updateMajorTickLabels];
@@ -1794,7 +1784,7 @@ extern NSDecimal CPTNiceLength(NSDecimal length);
 
 -(nullable NSNumber *)radialLabelLocation
 {
-    if ( isnan(radialLabelLocation.doubleValue) ) {
+    if ( isnan(radialLabelLocation.doubleValue)) {
         return self.defaultRadialLabelLocation;
     }
     else {

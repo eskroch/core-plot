@@ -1,8 +1,8 @@
 //
-//  VectorFieldPlot.m
-//  CorePlotGallery
+// VectorFieldPlot.m
+// CorePlotGallery
 //
-//  Created by Steve Wainwright on 14/12/2020.
+// Created by Steve Wainwright on 14/12/2020.
 //
 
 #import "VectorFieldPlot.h"
@@ -28,7 +28,7 @@
 
 -(nonnull instancetype)init
 {
-    if ( (self = [super init]) ) {
+    if ((self = [super init])) {
         graph    = nil;
         plotData = @[];
 
@@ -43,23 +43,22 @@
 {
     if ( self.plotData.count == 0 ) {
         NSMutableArray<NSDictionary *> *newData = [NSMutableArray array];
-        
+
         double x = -2.0 * M_PI;
-        while (x <= 2.0 * M_PI) {
+        while ( x <= 2.0 * M_PI ) {
             double y = -2.0 * M_PI;
-            while (y <= 2.0 * M_PI) {
-                double fx = sin(x);
-                double fy = sin(y);
-                double length = sqrt(fx * fx + fy * fy) / sqrt(2.0);
+            while ( y <= 2.0 * M_PI ) {
+                double fx        = sin(x);
+                double fy        = sin(y);
+                double length    = sqrt(fx * fx + fy * fy) / sqrt(2.0);
                 double direction = atan2(fy, fx);
-                
+
                 [newData addObject:
-                    @{ @(CPTVectorFieldPlotFieldX): @(x),
-                       @(CPTVectorFieldPlotFieldY): @(y),
-                       @(CPTVectorFieldPlotFieldVectorLength): @(length),
-                       @(CPTVectorFieldPlotFieldVectorDirection): @(direction)
-                    }
-                 ];
+                 @{ @(CPTVectorFieldPlotFieldX): @(x),
+                    @(CPTVectorFieldPlotFieldY): @(y),
+                    @(CPTVectorFieldPlotFieldVectorLength): @(length),
+                    @(CPTVectorFieldPlotFieldVectorDirection): @(direction) }
+                ];
                 y += M_PI / 8.0;
             }
             x += M_PI / 8.0;
@@ -71,7 +70,6 @@
 
 -(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
-    
 #if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGRect bounds = hostingView.bounds;
 #else
@@ -92,7 +90,6 @@
     textStyle.fontName = @"Helvetica";
     textStyle.fontSize = self.titleSize * CPTFloat(0.5);
 
-
     // Setup scatter plot space
     CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)newGraph.defaultPlotSpace;
     plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI) length:@(4.0 * M_PI)];
@@ -100,32 +97,31 @@
 
     PiNumberFormatter *formatter = [[PiNumberFormatter alloc] init];
     formatter.multiplier = @4;
-    
+
     // Axes
     CPTXYAxisSet *axisSet = (CPTXYAxisSet *)newGraph.axisSet;
     CPTXYAxis *x          = axisSet.xAxis;
     x.majorIntervalLength   = @(M_PI / 2.0);
     x.orthogonalPosition    = @(0.0);
     x.minorTicksPerInterval = 3;
-    x.labelFormatter = formatter;
+    x.labelFormatter        = formatter;
 
     CPTXYAxis *y = axisSet.yAxis;
     y.majorIntervalLength   = @(M_PI / 2.0);
     y.minorTicksPerInterval = 3;
     y.orthogonalPosition    = @(0.0);
-    y.labelFormatter = formatter;
+    y.labelFormatter        = formatter;
 
     // Create a plot that uses the data source method
     CPTVectorFieldPlot *vectorFieldPlot = [[CPTVectorFieldPlot alloc] init];
-    vectorFieldPlot.identifier   = @"Vector Field [sin(x)\nsin(y)]";
-    vectorFieldPlot.dataSource   = self;
-    vectorFieldPlot.delegate     = self;
+    vectorFieldPlot.identifier = @"Vector Field [sin(x)\nsin(y)]";
+    vectorFieldPlot.dataSource = self;
+    vectorFieldPlot.delegate   = self;
 
     // Vector properties
     vectorFieldPlot.normalisedVectorLength = 0.25;
-    vectorFieldPlot.arrowSize = CGSizeMake(5.0, 5.0);
-    vectorFieldPlot.arrowType  = CPTVectorFieldArrowTypeSolid;
-    
+    vectorFieldPlot.arrowSize              = CGSizeMake(5.0, 5.0);
+    vectorFieldPlot.arrowType              = CPTVectorFieldArrowTypeSolid;
 
     // Add plot
     [newGraph addPlot:vectorFieldPlot];
@@ -139,7 +135,7 @@
     newGraph.legend.cornerRadius       = 5.0;
     newGraph.legend.swatchCornerRadius = 3.0;
     newGraph.legendAnchor              = CPTRectAnchorTop;
-    newGraph.legendDisplacement        = CGPointMake(0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0) );
+    newGraph.legendDisplacement        = CGPointMake(0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0));
 }
 
 #pragma mark -
@@ -166,14 +162,15 @@
 #pragma mark -
 #pragma mark Plot Source Methods
 
-
--(nullable CPTLineStyle *)lineStyleForVectorFieldPlot:(nonnull CPTVectorFieldPlot *)plot recordIndex:(NSUInteger)idx {
+-(nullable CPTLineStyle *)lineStyleForVectorFieldPlot:(nonnull CPTVectorFieldPlot *)plot recordIndex:(NSUInteger)idx
+{
     CPTMutableLineStyle *linestyle = [[CPTMutableLineStyle alloc] init];
-    if( [self.plotData[idx][@(CPTVectorFieldPlotFieldVectorLength)] doubleValue] > 0.9 ) {
+
+    if ( [self.plotData[idx][@(CPTVectorFieldPlotFieldVectorLength)] doubleValue] > 0.9 ) {
         linestyle.lineWidth = 2.0;
         linestyle.lineColor = [CPTColor redColor];
     }
-    else if( [self.plotData[idx][@(CPTVectorFieldPlotFieldVectorLength)] doubleValue] > 0.7 ) {
+    else if ( [self.plotData[idx][@(CPTVectorFieldPlotFieldVectorLength)] doubleValue] > 0.7 ) {
         linestyle.lineWidth = 1.0;
         linestyle.lineColor = [CPTColor orangeColor];
     }

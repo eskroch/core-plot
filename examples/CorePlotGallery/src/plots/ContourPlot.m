@@ -1,8 +1,8 @@
 //
-//  ContourPlot.m
-//  CorePlotGallery
+// ContourPlot.m
+// CorePlotGallery
 //
-//  Created by Steve Wainwright on 14/12/2020.
+// Created by Steve Wainwright on 14/12/2020.
 //
 
 #import "ContourPlot.h"
@@ -37,8 +37,8 @@ typedef NSFont CPTFont;
 
 -(nonnull instancetype)init
 {
-    if ( (self = [super init]) ) {
-        graph    = nil;
+    if ((self = [super init])) {
+        graph       = nil;
         dataSources = [[NSMutableSet alloc] init];
 
         self.title   = @"Contour Plot";
@@ -57,7 +57,6 @@ typedef NSFont CPTFont;
 
 -(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
-    
 #if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGRect bounds = hostingView.bounds;
 #else
@@ -79,11 +78,11 @@ typedef NSFont CPTFont;
     textStyle.fontSize = self.titleSize * CPTFloat(0.5);
 
     CGFloat ratio = self.graph.bounds.size.width / self.graph.bounds.size.height;
-    
+
     // Setup scatter plot space
     CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)newGraph.defaultPlotSpace;
-    if (ratio > 1) {
-        plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI  * ratio) length:@(4.0 * M_PI  * ratio)];
+    if ( ratio > 1 ) {
+        plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI * ratio) length:@(4.0 * M_PI * ratio)];
         plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI) length:@(4.0 * M_PI)];
     }
     else {
@@ -93,30 +92,30 @@ typedef NSFont CPTFont;
 
     PiNumberFormatter *formatter = [[PiNumberFormatter alloc] init];
     formatter.multiplier = @4;
-    
+
     // Axes
     CPTXYAxisSet *axisSet = (CPTXYAxisSet *)newGraph.axisSet;
     CPTXYAxis *x          = axisSet.xAxis;
     x.majorIntervalLength   = @(M_PI / 2.0);
     x.orthogonalPosition    = @(0.0);
     x.minorTicksPerInterval = 3;
-    x.labelFormatter = formatter;
+    x.labelFormatter        = formatter;
 
     CPTXYAxis *y = axisSet.yAxis;
     y.majorIntervalLength   = @(M_PI / 2.0);
     y.minorTicksPerInterval = 3;
     y.orthogonalPosition    = @(0.0);
-    y.labelFormatter = formatter;
+    y.labelFormatter        = formatter;
 
     // Contour properties
-    
+
     // Create some function plots
-    NSString *titleString          = @"sin(x)sin(y)";//@"0.5*(cos(x + π/4)+sin(y + π/4)";
-    CPTContourDataSourceBlock block       = ^(double xVal, double yVal) {
-//        return 0.5*(cos(xVal + M_PI_4)+sin(yVal + M_PI_4));
+    NSString *titleString = @"sin(x)sin(y)"; // @"0.5*(cos(x + π/4)+sin(y + π/4)";
+    CPTContourDataSourceBlock block = ^(double xVal, double yVal) {
+// return 0.5*(cos(xVal + M_PI_4)+sin(yVal + M_PI_4));
         return sin(xVal) * sin(yVal);
     };
-        
+
     // Create a plot that uses the data source method
     CPTContourPlot *contourPlot = [[CPTContourPlot alloc] init];
     contourPlot.identifier = [NSString stringWithFormat:@"Function Contour Plot %lu", (unsigned long)(1)];
@@ -124,7 +123,7 @@ typedef NSFont CPTFont;
     CPTDictionary *textAttributes = x.titleTextStyle.attributes;
 
     NSMutableAttributedString *title = [[NSMutableAttributedString alloc] initWithString:titleString
-                                                                                  attributes:textAttributes];
+                                                                              attributes:textAttributes];
 
     CPTFont *fontAttribute = textAttributes[NSFontAttributeName];
     if ( fontAttribute ) {
@@ -145,15 +144,15 @@ typedef NSFont CPTFont;
 
     contourPlot.attributedTitle = title;
 
-    contourPlot.interpolation = CPTContourPlotInterpolationCurved;//CPTContourPlotInterpolationLinear;
+    contourPlot.interpolation             = CPTContourPlotInterpolationCurved; // CPTContourPlotInterpolationLinear;
     contourPlot.curvedInterpolationOption = CPTContourPlotCurvedInterpolationHermiteCubic;
-    
+
     contourPlot.alignsPointsToPixels = YES;
 
-    CPTFieldFunctionDataSource *plotDataSource  = [CPTFieldFunctionDataSource dataSourceForPlot:contourPlot withBlock:block];
+    CPTFieldFunctionDataSource *plotDataSource = [CPTFieldFunctionDataSource dataSourceForPlot:contourPlot withBlock:block];
 
     CGFloat resolution;
-    if(ratio < 1.0) {
+    if ( ratio < 1.0 ) {
         resolution = self.graph.plotAreaFrame.plotArea.bounds.size.height * 0.02;
     }
     else {
@@ -163,31 +162,31 @@ typedef NSFont CPTFont;
     plotDataSource.resolutionY = resolution;
 
     [self.dataSources addObject:plotDataSource];
-    
-    contourPlot.noIsoCurves = 20;
-    contourPlot.showLabels = NO;
+
+    contourPlot.noIsoCurves         = 20;
+    contourPlot.showLabels          = NO;
     contourPlot.showIsoCurvesLabels = YES;
-    
-    contourPlot.dataSource = plotDataSource;
+
+    contourPlot.dataSource                  = plotDataSource;
     contourPlot.contourAppearanceDataSource = self;
-    contourPlot.delegate     = self;
-    
+    contourPlot.delegate                    = self;
+
     // isoCurve label appearance
     CPTMutableTextStyle *labelTextstyle = [[CPTMutableTextStyle alloc] init];
-    labelTextstyle.fontName = @"Helvetica";
-    labelTextstyle.fontSize = 15.0;
-    labelTextstyle.textAlignment = CPTAlignmentCenter;
-    labelTextstyle.color = nil;//[CPTColor lightGrayColor];
+    labelTextstyle.fontName             = @"Helvetica";
+    labelTextstyle.fontSize             = 15.0;
+    labelTextstyle.textAlignment        = CPTAlignmentCenter;
+    labelTextstyle.color                = nil; // [CPTColor lightGrayColor];
     contourPlot.isoCurvesLabelTextStyle = labelTextstyle;
     NSNumberFormatter *labelFormatter = [[NSNumberFormatter alloc] init];
     labelFormatter.maximumFractionDigits = 1;
-    contourPlot.isoCurvesLabelFormatter = labelFormatter;
-    
-    contourPlot.limits = [CPTMutableNumberArray arrayWithObjects: [NSNumber numberWithDouble:-2.0 * M_PI], [NSNumber numberWithDouble:2.0 * M_PI], [NSNumber numberWithDouble:-2.0 * M_PI], [NSNumber numberWithDouble:2.0 * M_PI], nil];
+    contourPlot.isoCurvesLabelFormatter  = labelFormatter;
+
+    contourPlot.limits = [CPTMutableNumberArray arrayWithObjects:[NSNumber numberWithDouble:-2.0 * M_PI], [NSNumber numberWithDouble:2.0 * M_PI], [NSNumber numberWithDouble:-2.0 * M_PI], [NSNumber numberWithDouble:2.0 * M_PI], nil];
 
     // Add plot
     [newGraph addPlot:contourPlot];
- //   newGraph.defaultPlotSpace.delegate = self;
+    // newGraph.defaultPlotSpace.delegate = self;
 
     // Add legend
     newGraph.legend                    = [CPTLegend legendWithGraph:newGraph];
@@ -197,9 +196,8 @@ typedef NSFont CPTFont;
     newGraph.legend.cornerRadius       = 5.0;
     newGraph.legend.swatchCornerRadius = 3.0;
     newGraph.legendAnchor              = CPTRectAnchorTop;
-    newGraph.legendDisplacement        = CGPointMake(0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0) );
+    newGraph.legendDisplacement        = CGPointMake(0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0));
 }
-
 
 #pragma mark -
 #pragma mark Plot Space Delegate Methods
@@ -242,6 +240,7 @@ typedef NSFont CPTFont;
     }
 
     UIFont *italicFont = nil;
+
     if ( italicName ) {
         italicFont = [UIFont fontWithName:italicName
                                      size:oldFont.pointSize];
@@ -261,36 +260,39 @@ typedef NSFont CPTFont;
 #pragma mark -
 #pragma mark Plot Appearance Source Methods
 
--(nullable CPTLineStyle *)lineStyleForContourPlot:(nonnull CPTContourPlot *)plot isoCurveIndex:(NSUInteger)idx {
-    
+-(nullable CPTLineStyle *)lineStyleForContourPlot:(nonnull CPTContourPlot *)plot isoCurveIndex:(NSUInteger)idx
+{
     CPTMutableLineStyle *linestyle = [plot.isoCurveLineStyle mutableCopy];
+
     linestyle.lineWidth = 2.0;
 
     linestyle.lineColor = [CPTColor colorWithComponentRed:(CGFloat)((float)(idx) / (float)(plot.noIsoCurves)) green:(CGFloat)(1.0f - (float)(idx) / (float)(plot.noIsoCurves)) blue:0.0 alpha:1.0];
-    
+
     return linestyle;
 }
 
--(nullable CPTLayer *)isoCurveLabelForPlot:(CPTContourPlot *)plot isoCurveIndex:(NSUInteger)idx {
+-(nullable CPTLayer *)isoCurveLabelForPlot:(CPTContourPlot *)plot isoCurveIndex:(NSUInteger)idx
+{
     static CPTMutableTextStyle *lightGrayText = nil;
-    static dispatch_once_t lightGrayOnceToken      = 0;
-    
+    static dispatch_once_t lightGrayOnceToken = 0;
+
     dispatch_once(&lightGrayOnceToken, ^{
         lightGrayText          = [[CPTMutableTextStyle alloc] init];
         lightGrayText.color    = [CPTColor lightGrayColor];
         lightGrayText.fontSize = self.titleSize * CPTFloat(0.15);
     });
-    
-    CPTTextLayer *newLayer    = nil;
+
+    CPTTextLayer *newLayer         = nil;
     CPTNumberArray *isoCurveValues = [plot getIsoCurveValues];
-    if( isoCurveValues != nil && idx < isoCurveValues.count ) {
-        NSNumberFormatter *formatter = (NSNumberFormatter*)plot.isoCurvesLabelFormatter;
-        NSString *labelString = [formatter stringForObjectValue: isoCurveValues[idx]];
-        if (plot.isoCurvesLabelTextStyle != nil) {
+
+    if ((isoCurveValues != nil) && (idx < isoCurveValues.count)) {
+        NSNumberFormatter *formatter = (NSNumberFormatter *)plot.isoCurvesLabelFormatter;
+        NSString *labelString        = [formatter stringForObjectValue:isoCurveValues[idx]];
+        if ( plot.isoCurvesLabelTextStyle != nil ) {
             if ( plot.isoCurvesLabelTextStyle.color == nil ) {
-                CPTMutableTextStyle *mutLabelTextStyle = [CPTMutableTextStyle textStyleWithStyle: plot.isoCurvesLabelTextStyle];
+                CPTMutableTextStyle *mutLabelTextStyle = [CPTMutableTextStyle textStyleWithStyle:plot.isoCurvesLabelTextStyle];
                 mutLabelTextStyle.color = [CPTColor colorWithComponentRed:(CGFloat)((float)idx / (float)([plot getIsoCurveValues].count)) green:(CGFloat)(1.0f - (float)idx / (float)([plot getIsoCurveValues].count)) blue:0.0 alpha:1.0];
-                newLayer = [[CPTTextLayer alloc] initWithText:labelString style:mutLabelTextStyle];
+                newLayer                = [[CPTTextLayer alloc] initWithText:labelString style:mutLabelTextStyle];
             }
             else {
                 newLayer = [[CPTTextLayer alloc] initWithText:labelString style:plot.isoCurvesLabelTextStyle];
@@ -304,9 +306,9 @@ typedef NSFont CPTFont;
     return newLayer;
 }
 
-- (NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot {
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
+{
     return 0;
 }
-
 
 @end

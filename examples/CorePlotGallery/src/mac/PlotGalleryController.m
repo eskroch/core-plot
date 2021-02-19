@@ -48,7 +48,7 @@ static NSString *const kCollectionItem   = @"PlotViewItem";
 
     // added S.Wainwright
     for ( Class c in [CPTTheme themeClasses] ) {
-        if(![[c name] containsString:@" Polar"]) {
+        if ( ![[c name] containsString:@" Polar"] ) {
             [self.themePopUpButton addItemWithTitle:[c name]];
         }
     }

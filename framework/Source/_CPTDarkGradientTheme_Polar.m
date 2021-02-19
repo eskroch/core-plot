@@ -7,10 +7,10 @@
 #import "CPTMutableLineStyle.h"
 #import "CPTMutableTextStyle.h"
 #import "CPTPlotAreaFrame.h"
-#import "CPTUtilities.h"
 #import "CPTPolarAxis.h"
 #import "CPTPolarAxisSet.h"
 #import "CPTPolarGraph.h"
+#import "CPTUtilities.h"
 
 CPTThemeName const kCPTDarkGradientTheme_Polar = @"Dark Gradients Polar";
 
@@ -45,18 +45,17 @@ CPTThemeName const kCPTDarkGradientTheme_Polar = @"Dark Gradients Polar";
 -(void)applyThemeToAxis:(CPTAxis *)_axis usingMajorLineStyle:(nonnull CPTLineStyle *)majorLineStyle minorLineStyle:(nonnull CPTLineStyle *)minorLineStyle textStyle:(nonnull CPTMutableTextStyle *)textStyle minorTickTextStyle:(nonnull CPTMutableTextStyle *)minorTickTextStyle
 {
     // added S.Wainwright
-    CPTPolarAxis *axis = (CPTPolarAxis*)_axis;
-    if(axis.coordinate == CPTCoordinateZ)
-    {
-        axis.labelingPolicy          = CPTAxisLabelingPolicyFixedInterval;
-        axis.majorIntervalLength     = @(M_PI/6.0);
-        axis.tickDirection           = CPTSignNone;
-        axis.minorTicksPerInterval   = 2;
-        axis.majorTickLineStyle      = majorLineStyle;
-        axis.minorTickLineStyle      = minorLineStyle;
+    CPTPolarAxis *axis = (CPTPolarAxis *)_axis;
+
+    if ( axis.coordinate == CPTCoordinateZ ) {
+        axis.labelingPolicy        = CPTAxisLabelingPolicyFixedInterval;
+        axis.majorIntervalLength   = @(M_PI / 6.0);
+        axis.tickDirection         = CPTSignNone;
+        axis.minorTicksPerInterval = 2;
+        axis.majorTickLineStyle    = majorLineStyle;
+        axis.minorTickLineStyle    = minorLineStyle;
     }
-    else
-    {
+    else {
         axis.labelingPolicy          = CPTAxisLabelingPolicyFixedInterval;
         axis.majorIntervalLength     = @0.5;
         axis.tickDirection           = CPTSignNone;
@@ -92,6 +91,7 @@ CPTThemeName const kCPTDarkGradientTheme_Polar = @"Dark Gradients Polar";
     plotAreaFrame.fill = [CPTFill fillWithGradient:gradient];
 
     CPTMutableLineStyle *borderLineStyle = [CPTMutableLineStyle lineStyle];
+
     borderLineStyle.lineColor = [CPTColor colorWithGenericGray:CPTFloat(0.2)];
     borderLineStyle.lineWidth = CPTFloat(4.0);
 
@@ -108,21 +108,24 @@ CPTThemeName const kCPTDarkGradientTheme_Polar = @"Dark Gradients Polar";
     majorLineStyle.lineWidth = CPTFloat(2.0);
 
     CPTMutableLineStyle *minorLineStyle = [CPTMutableLineStyle lineStyle];
+
     minorLineStyle.lineCap   = kCGLineCapSquare;
     minorLineStyle.lineColor = [CPTColor darkGrayColor];
     minorLineStyle.lineWidth = CPTFloat(1.0);
 
     CPTMutableTextStyle *whiteTextStyle = [[CPTMutableTextStyle alloc] init];
+
     whiteTextStyle.color    = [CPTColor whiteColor];
     whiteTextStyle.fontSize = CPTFloat(14.0);
 
     CPTMutableTextStyle *whiteMinorTickTextStyle = [[CPTMutableTextStyle alloc] init];
+
     whiteMinorTickTextStyle.color    = [CPTColor whiteColor];
     whiteMinorTickTextStyle.fontSize = CPTFloat(12.0);
-    
+
     for ( CPTPolarAxis *axis in axisSet.axes ) {
         [self applyThemeToAxis:axis usingMajorLineStyle:majorLineStyle minorLineStyle:minorLineStyle textStyle:whiteTextStyle minorTickTextStyle:whiteMinorTickTextStyle];
-        }
+    }
 }
 
 #pragma mark -

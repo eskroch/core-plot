@@ -14,12 +14,12 @@
 #import "CPTMutablePlotRange.h"
 #import "CPTPlotArea.h"
 #import "CPTPlotSpace.h"
+#import "CPTPolarAxis.h"      // added S.Wainwright 2/12/2020
+#import "CPTPolarPlotSpace.h" // added S.Wainwright
 #import "CPTShadow.h"
 #import "CPTTextLayer.h"
 #import "CPTUtilities.h"
 #import "NSCoderExtensions.h"
-#import "CPTPolarAxis.h"  // added S.Wainwright 2/12/2020
-#import "CPTPolarPlotSpace.h" // added S.Wainwright
 
 /** @defgroup axisAnimation Axes
  *  @brief Axis properties that can be animated using Core Animation.
@@ -1039,13 +1039,13 @@ NSDecimal CPTNiceLength(NSDecimal length);
 
         case CPTScaleTypeLog:
             // supported scale type--check range
-            if ([self isKindOfClass:[CPTPolarAxis class]]) { // added S.Wainwright 2/12/2020
-                if ( (range.minLimitDouble == 0.0) || (range.maxLimitDouble == 0.0) ) {
+            if ( [self isKindOfClass:[CPTPolarAxis class]] ) { // added S.Wainwright 2/12/2020
+                if ((range.minLimitDouble == 0.0) || (range.maxLimitDouble == 0.0)) {
                     valid = NO;
                 }
             }
             else {
-                if ( (range.minLimitDouble <= 0.0) || (range.maxLimitDouble <= 0.0) ) {
+                if ((range.minLimitDouble <= 0.0) || (range.maxLimitDouble <= 0.0)) {
                     valid = NO;
                 }
             }
@@ -1160,10 +1160,11 @@ NSDecimal CPTNiceLength(NSDecimal length);
                 double maxLimit = range.maxLimitDouble;
 
                 // added S.Wainwright 2/12/2020
+
                 /*if ( (minLimit != 0.0) && (maxLimit != 0.0) && [self isKindOfClass:[CPTPolarAxis class]]) {
-                    
-                }
-                else*/ if ((minLimit > 0.0) && (maxLimit > 0.0)) {
+                 *
+                 * }
+                 * else*/if ((minLimit > 0.0) && (maxLimit > 0.0)) {
                     // Determine interval value
                     length = log10(maxLimit / minLimit);
 
@@ -1673,7 +1674,7 @@ NSDecimal CPTNiceLength(NSDecimal length)
             needsNewContentLayer      = YES;
         }
         // added S.Wainwright
-        if (self.coordinate == CPTCoordinateZ && [self isKindOfClass:[CPTPolarAxis class]] && ((CPTPolarPlotSpace*)thePlotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees) {
+        if ((self.coordinate == CPTCoordinateZ) && [self isKindOfClass:[CPTPolarAxis class]] && (((CPTPolarPlotSpace *)thePlotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
             NSNumber *adjustedTickLocation = [NSNumber numberWithDouble:[tickLocation doubleValue] / 180.0 * M_PI];
             newAxisLabel.tickLocation = adjustedTickLocation;
         }
@@ -2104,27 +2105,27 @@ NSDecimal CPTNiceLength(NSDecimal length)
     }
 
     id<CPTAxisDelegate> theDelegate = (id<CPTAxisDelegate>)self.delegate;
-    
+
     // Title  added S.Wainwright
     if ( [theDelegate respondsToSelector:@selector(axis:axisTitleTouchDown:atPoint:)] ||
-        [theDelegate respondsToSelector:@selector(axis:axisTitleTouchDown:withEvent:)] ) {
+         [theDelegate respondsToSelector:@selector(axis:axisTitleTouchDown:withEvent:)] ) {
         CPTLayer *contentLayer = self.axisTitle.contentLayer;
         if ( contentLayer && !contentLayer.hidden ) {
             CGPoint axisTitlePoint = [theGraph convertPoint:interactionPoint toLayer:contentLayer];
-            
-            if ( CGRectContainsPoint(contentLayer.bounds, axisTitlePoint) ) {
+
+            if ( CGRectContainsPoint(contentLayer.bounds, axisTitlePoint)) {
                 BOOL handled = NO;
-                
+
                 if ( [theDelegate respondsToSelector:@selector(axis:axisTitleTouchDown:atPoint:)] ) {
                     handled = YES;
                     [theDelegate axis:self axisTitleTouchDown:self.axisTitle atPoint:interactionPoint];
                 }
-                
+
                 if ( [theDelegate respondsToSelector:@selector(axis:axisTitleTouchDown:withEvent:)] ) {
                     handled = YES;
                     [theDelegate axis:self axisTitleTouchDown:self.axisTitle withEvent:event];
                 }
-                
+
                 if ( handled ) {
                     return YES;
                 }
@@ -2245,31 +2246,31 @@ NSDecimal CPTNiceLength(NSDecimal length)
 
     // Title   added S.Wainwright
     if ( [theDelegate respondsToSelector:@selector(axis:axisTitleTouchUp:atPoint:)] ||
-        [theDelegate respondsToSelector:@selector(axis:axisTitleTouchUp:withEvent:)]) {
+         [theDelegate respondsToSelector:@selector(axis:axisTitleTouchUp:withEvent:)] ) {
         CPTLayer *contentLayer = self.axisTitle.contentLayer;
         if ( contentLayer && !contentLayer.hidden ) {
             CGPoint axisTitlePoint = [theGraph convertPoint:interactionPoint toLayer:contentLayer];
-            
-            if ( CGRectContainsPoint(contentLayer.bounds, axisTitlePoint) ) {
+
+            if ( CGRectContainsPoint(contentLayer.bounds, axisTitlePoint)) {
                 BOOL handled = NO;
-                
+
                 if ( [theDelegate respondsToSelector:@selector(axis:axisTitleTouchUp:atPoint:)] ) {
                     handled = YES;
                     [theDelegate axis:self axisTitleTouchUp:self.axisTitle atPoint:interactionPoint];
                 }
-                
+
                 if ( [theDelegate respondsToSelector:@selector(axis:axisTitleTouchUp:withEvent:)] ) {
                     handled = YES;
                     [theDelegate axis:self axisTitleTouchUp:self.axisTitle withEvent:event];
                 }
-                
+
                 if ( handled ) {
                     return YES;
                 }
             }
         }
     }
-    
+
     // Tick labels
     if ( [theDelegate respondsToSelector:@selector(axis:labelTouchUp:)] ||
          [theDelegate respondsToSelector:@selector(axis:labelTouchUp:withEvent:)] ||

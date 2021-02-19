@@ -248,8 +248,8 @@ typedef NS_ENUM (NSInteger, CPTLegendSwatchLayout) {
 
 /// @name Entries   added S.Wainwright
 /// @{
--(nullable NSMutableArray*)getLegendEntries;
--(void)setNewLegendEntries:(nonnull NSMutableArray*)entries;
+-(nullable NSMutableArray *)getLegendEntries;
+-(void)setNewLegendEntries:(nonnull NSMutableArray *)entries;
 /// @}
 
 @end

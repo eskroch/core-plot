@@ -10,8 +10,8 @@
 #import "CPTPlotRange.h"
 #import "CPTPlotSpace.h"
 #import "CPTPlotSpaceAnnotation.h"
-#import "CPTUtilities.h"
 #import "CPTPolarPlotSpace.h"
+#import "CPTUtilities.h"
 #import "NSCoderExtensions.h"
 #import <tgmath.h>
 
@@ -27,13 +27,12 @@
  *  @endif
  **/
 
-NSString *const CPTPolarPlotBindingThetaValues     = @"thetaValues";     ///< Theta values.
-NSString *const CPTPolarPlotBindingRadiusValues     = @"radiusValues";     ///< Radius values.
-NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbols.
+NSString *const CPTPolarPlotBindingThetaValues  = @"thetaValues";  ///< Theta values.
+NSString *const CPTPolarPlotBindingRadiusValues = @"radiusValues"; ///< Radius values.
+NSString *const CPTPolarPlotBindingPlotSymbols  = @"plotSymbols";  ///< Plot symbols.
 
 /// @cond
 @interface CPTPolarPlot()
-
 
 @property (nonatomic, readwrite, copy, nullable) CPTNumberArray *thetaValues;
 @property (nonatomic, readwrite, copy, nullable) CPTNumberArray *radiusValues;
@@ -207,6 +206,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         [self exposeBinding:CPTPolarPlotBindingPlotSymbols];
     }
 }
+
 #endif
 
 /// @endcond
@@ -237,7 +237,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
  **/
 -(nonnull instancetype)initWithFrame:(CGRect)newFrame
 {
-    if ( (self = [super initWithFrame:newFrame]) ) {
+    if ((self = [super initWithFrame:newFrame])) {
         dataLineStyle                   = [[CPTLineStyle alloc] init];
         plotSymbol                      = nil;
         areaFill                        = nil;
@@ -264,7 +264,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
 -(nonnull instancetype)initWithLayer:(nonnull id)layer
 {
-    if ( (self = [super initWithLayer:layer]) ) {
+    if ((self = [super initWithLayer:layer])) {
         CPTPolarPlot *theLayer = (CPTPolarPlot *)layer;
 
         dataLineStyle                           = theLayer->dataLineStyle;
@@ -320,8 +320,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
 -(nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
-    if ( (self = [super initWithCoder:coder]) ) {
-        
+    if ((self = [super initWithCoder:coder])) {
         interpolation                  = (CPTPolarPlotInterpolation)[coder decodeIntegerForKey:@"CPTPolarPlot.interpolation"];
         histogramOption                = (CPTPolarPlotHistogramOption)[coder decodeIntegerForKey:@"CPTPolarPlot.histogramOption"];
         curvedInterpolationOption      = (CPTPolarPlotCurvedInterpolationOption)[coder decodeIntegerForKey:@"CPTPolarPlot.curvedInterpolationOption"];
@@ -401,86 +400,88 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 -(nullable id)numbersFromDataSourceForField:(NSUInteger)fieldEnum recordIndexRange:(NSRange)indexRange
 {
     id numbers; // can be CPTNumericData, NSArray, or NSData
-    
+
     id<CPTPlotDataSource> theDataSource = self.dataSource;
-    
+
     if ( theDataSource ) {
         if ( [theDataSource respondsToSelector:@selector(dataForPlot:field:recordIndexRange:)] ) {
-            if(fieldEnum == CPTPolarPlotFieldRadialAngle && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees){
+            if ((fieldEnum == CPTPolarPlotFieldRadialAngle) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
                 numbers = [theDataSource dataForPlot:self field:fieldEnum recordIndexRange:indexRange];
                 const void *ptrFactor = NULL;
                 NSUInteger numSamples = [[numbers sampleArray] count];
-                switch ([numbers dataTypeFormat]) {
+                switch ( [numbers dataTypeFormat] ) {
                     case CPTUndefinedDataType:
                     case CPTIntegerDataType:
                     case CPTUnsignedIntegerDataType:
                     case CPTComplexFloatingPointDataType:
                         break;
-                        
+
                     case CPTFloatingPointDataType:
                         switch ( [numbers sampleBytes] ) {
                             case sizeof(float):
                             { // float
-                                const float Factor = (float)M_PI/180.0f;
+                                const float Factor = (float)M_PI / 180.0f;
                                 ptrFactor = &Factor;
                             }
-                                break;
-                                
+                            break;
+
                             case sizeof(double):
                             { // double
-                                const double Factor = M_PI/180.0;
+                                const double Factor = M_PI / 180.0;
                                 ptrFactor = &Factor;
                             }
-                                break;
+                            break;
                         }
                         break;
-                    
+
                     case CPTDecimalDataType:
                         switch ( [numbers sampleBytes] ) {
                             case sizeof(NSDecimal):
                             { // NSDecimal
-                                NSDecimal Factor = [[NSNumber numberWithDouble:M_PI/180.0] decimalValue];
+                                NSDecimal Factor = [[NSNumber numberWithDouble:M_PI / 180.0] decimalValue];
                                 ptrFactor = &Factor;
                             }
-                                break;
+                            break;
                         }
                         break;
-                        
                 }
 
-                if(ptrFactor != NULL){
-                    for(NSUInteger i = 0; i < numSamples; i++ ){
-//                        [numbers multiplyByFactorSamplePointer:i Factor:ptrFactor];
+                if ( ptrFactor != NULL ) {
+                    for ( NSUInteger i = 0; i < numSamples; i++ ) {
+// [numbers multiplyByFactorSamplePointer:i Factor:ptrFactor];
                     }
                 }
             }
-            else
+            else {
                 numbers = [theDataSource dataForPlot:self field:fieldEnum recordIndexRange:indexRange];
+            }
         }
         else if ( [theDataSource respondsToSelector:@selector(doublesForPlot:field:recordIndexRange:)] ) {
             numbers = [NSMutableData dataWithLength:sizeof(double) * indexRange.length];
             double *fieldValues  = [numbers mutableBytes];
             double *doubleValues = [theDataSource doublesForPlot:self field:fieldEnum recordIndexRange:indexRange];
             memcpy(fieldValues, doubleValues, sizeof(double) * indexRange.length);
-            if(fieldEnum == CPTPolarPlotFieldRadialAngle && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees){
+            if ((fieldEnum == CPTPolarPlotFieldRadialAngle) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
                 NSUInteger recordIndex;
                 for ( recordIndex = indexRange.location; recordIndex < indexRange.location + indexRange.length; ++recordIndex ) {
-                    fieldValues[recordIndex-indexRange.location] = fieldValues[recordIndex-indexRange.location]/180.0*M_PI;
+                    fieldValues[recordIndex - indexRange.location] = fieldValues[recordIndex - indexRange.location] / 180.0 * M_PI;
                 }
             }
         }
         else if ( [theDataSource respondsToSelector:@selector(numbersForPlot:field:recordIndexRange:)] ) {
             NSArray *numberArray = [theDataSource numbersForPlot:self field:fieldEnum recordIndexRange:indexRange];
             if ( numberArray ) {
-                if(fieldEnum == CPTPolarPlotFieldRadialAngle && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees){
+                if ((fieldEnum == CPTPolarPlotFieldRadialAngle) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
                     NSMutableArray *mutableNumberArray = [NSMutableArray arrayWithArray:numberArray];
                     NSUInteger recordIndex;
-                    for( recordIndex = 0; recordIndex < [mutableNumberArray count]; ++recordIndex )
-                        [mutableNumberArray replaceObjectAtIndex:recordIndex withObject:[NSNumber numberWithDouble:[[mutableNumberArray objectAtIndex:recordIndex] doubleValue]/180.0*M_PI]];
+                    for ( recordIndex = 0; recordIndex < [mutableNumberArray count]; ++recordIndex ) {
+                        [mutableNumberArray replaceObjectAtIndex:recordIndex withObject:[NSNumber numberWithDouble:[[mutableNumberArray objectAtIndex:recordIndex] doubleValue] / 180.0 * M_PI]];
+                    }
                     numbers = [NSArray arrayWithArray:mutableNumberArray];
                 }
-                else
+                else {
                     numbers = [NSArray arrayWithArray:numberArray];
+                }
             }
             else {
                 numbers = nil;
@@ -492,10 +493,12 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             double *fieldValues      = fieldData.mutableBytes;
             for ( recordIndex = indexRange.location; recordIndex < indexRange.location + indexRange.length; ++recordIndex ) {
                 double number = [theDataSource doubleForPlot:self field:fieldEnum recordIndex:recordIndex];
-                if(fieldEnum == CPTPolarPlotFieldRadialAngle && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)
-                    *fieldValues++ = number/180.0*M_PI;
-                else
+                if ((fieldEnum == CPTPolarPlotFieldRadialAngle) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
+                    *fieldValues++ = number / 180.0 * M_PI;
+                }
+                else {
                     *fieldValues++ = number;
+                }
             }
             numbers = fieldData;
         }
@@ -509,12 +512,13 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                     id number = [theDataSource numberForPlot:self field:fieldEnum recordIndex:recordIndex];
                     if ( number ) {
                         {
-                            if(fieldEnum == CPTPolarPlotFieldRadialAngle && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)
-                                [fieldValues addObject:[NSNumber numberWithDouble:[(NSNumber*)number doubleValue]/180.0*M_PI]];
-                            else
+                            if ((fieldEnum == CPTPolarPlotFieldRadialAngle) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
+                                [fieldValues addObject:[NSNumber numberWithDouble:[(NSNumber *) number doubleValue] / 180.0 * M_PI]];
+                            }
+                            else {
                                 [fieldValues addObject:number];
+                            }
                         }
-                        
                     }
                     else {
                         [fieldValues addObject:nullObject];
@@ -545,123 +549,126 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 -(BOOL)loadNumbersForAllFieldsFromDataSourceInRecordIndemajorRange:(NSRange)indexRange
 {
     BOOL hasData = NO;
-    
+
     id<CPTPlotDataSource> theDataSource = self.dataSource;
-    
+
     if ( [theDataSource respondsToSelector:@selector(dataForPlot:recordIndexRange:)] ) {
         CPTNumericData *data = [theDataSource dataForPlot:self recordIndexRange:indexRange];
-        
+
         if ( [data isKindOfClass:[CPTNumericData class]] ) {
             const NSUInteger sampleCount = data.numberOfSamples;
             CPTNumericDataType dataType  = data.dataType;
-            
-            if ( (sampleCount > 0) && (data.numberOfDimensions == 2) ) {
+
+            if ((sampleCount > 0) && (data.numberOfDimensions == 2)) {
                 CPTNumberArray *theShape    = data.shape;
                 const NSUInteger rowCount   = theShape[0].unsignedIntegerValue;
                 const NSUInteger fieldCount = theShape[1].unsignedIntegerValue;
-                
+
                 if ( fieldCount > 0 ) {
                     // convert data type if needed
                     switch ( self.cachePrecision ) {
                         case CPTPlotCachePrecisionAuto:
                             if ( self.doublePrecisionCache ) {
-                                if ( !CPTDataTypeEqualToDataType(dataType, self.doubleDataType) ) {
+                                if ( !CPTDataTypeEqualToDataType(dataType, self.doubleDataType)) {
                                     CPTMutableNumericData *mutableData = [CPTMutableNumericData numericDataWithData:data.data dataType:data.dataType shape:theShape];
- //                                   mutableData.dataType = self.doubleDataType;
-                                    data                 = mutableData;
+                                    // mutableData.dataType = self.doubleDataType;
+                                    data = mutableData;
                                 }
                             }
                             else {
-                                if ( !CPTDataTypeEqualToDataType(dataType, self.decimalDataType) ) {
-//                                    CPTMutableNumericData *mutableData = [data mutableCopy];
-//                                    mutableData.dataType = self.decimalDataType;
+                                if ( !CPTDataTypeEqualToDataType(dataType, self.decimalDataType)) {
+// CPTMutableNumericData *mutableData = [data mutableCopy];
+// mutableData.dataType = self.decimalDataType;
                                     CPTMutableNumericData *mutableData = [CPTMutableNumericData numericDataWithData:data.data dataType:data.dataType shape:theShape];
-                                    data                 = mutableData;
+                                    data = mutableData;
                                 }
                             }
                             break;
-                            
+
                         case CPTPlotCachePrecisionDecimal:
-                            if ( !CPTDataTypeEqualToDataType(dataType, self.decimalDataType) ) {
-//                                CPTMutableNumericData *mutableData = [data mutableCopy];
-//                                mutableData.dataType = self.decimalDataType;
+                            if ( !CPTDataTypeEqualToDataType(dataType, self.decimalDataType)) {
+// CPTMutableNumericData *mutableData = [data mutableCopy];
+// mutableData.dataType = self.decimalDataType;
                                 CPTMutableNumericData *mutableData = [CPTMutableNumericData numericDataWithData:data.data dataType:data.dataType shape:theShape];
-                                data                 = mutableData;
+                                data = mutableData;
                             }
                             break;
-                            
+
                         case CPTPlotCachePrecisionDouble:
-                            if ( !CPTDataTypeEqualToDataType(dataType, self.doubleDataType) ) {
-//                                CPTMutableNumericData *mutableData = [data mutableCopy];
-//                                mutableData.dataType = self.doubleDataType;
+                            if ( !CPTDataTypeEqualToDataType(dataType, self.doubleDataType)) {
+// CPTMutableNumericData *mutableData = [data mutableCopy];
+// mutableData.dataType = self.doubleDataType;
                                 CPTMutableNumericData *mutableData = [CPTMutableNumericData numericDataWithData:data.data dataType:data.dataType shape:theShape];
-                                data                 = mutableData;
+                                data = mutableData;
                             }
                             break;
                     }
-                    
+
                     // add the data to the cache
                     const NSUInteger bufferLength = rowCount * dataType.sampleBytes;
-                    
+
                     switch ( data.dataOrder ) {
                         case CPTDataOrderRowsFirst:
                         {
                             const void *sourceEnd = (const int8_t *)(data.bytes) + data.length;
-                            
+
                             for ( NSUInteger fieldNum = 0; fieldNum < fieldCount; fieldNum++ ) {
                                 NSMutableData *tempData = [[NSMutableData alloc] initWithLength:bufferLength];
-                                
-                                if ( CPTDataTypeEqualToDataType(dataType, self.doubleDataType) ) {
+
+                                if ( CPTDataTypeEqualToDataType(dataType, self.doubleDataType)) {
                                     const double *sourceData = [data samplePointerAtIndex:0, fieldNum];
                                     double *destData         = tempData.mutableBytes;
-                                    
+
                                     while ( sourceData < (const double *)sourceEnd ) {
-                                        if(fieldNum == CPTPolarPlotFieldRadialAngle && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)
-                                            *destData++ = *sourceData*M_PI/180.0;
-                                        else
+                                        if ((fieldNum == CPTPolarPlotFieldRadialAngle) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
+                                            *destData++ = *sourceData * M_PI / 180.0;
+                                        }
+                                        else {
                                             *destData++ = *sourceData;
+                                        }
                                         sourceData += fieldCount;
                                     }
                                 }
                                 else {
                                     const NSDecimal *sourceData = [data samplePointerAtIndex:0, fieldNum];
                                     NSDecimal *destData         = tempData.mutableBytes;
-                                    
+
                                     while ( sourceData < (const NSDecimal *)sourceEnd ) {
-                                        if(fieldNum == CPTPolarPlotFieldRadialAngle && ((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees){
+                                        if ((fieldNum == CPTPolarPlotFieldRadialAngle) && (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)) {
                                             NSDecimal result;
-                                            NSNumber *factor = [NSNumber numberWithDouble:M_PI/180.0];
+                                            NSNumber *factor        = [NSNumber numberWithDouble:M_PI / 180.0];
                                             NSDecimal decimalFactor = [factor decimalValue];
-                                            //NSCalculationError error =
-                                            NSDecimalMultiply ( &result, sourceData, &decimalFactor, NSRoundPlain);
+                                            // NSCalculationError error =
+                                            NSDecimalMultiply(&result, sourceData, &decimalFactor, NSRoundPlain);
                                             *destData++ = result;
                                         }
-                                        else
+                                        else {
                                             *destData++ = *sourceData;
+                                        }
                                         sourceData += fieldCount;
                                     }
                                 }
-                                
+
                                 CPTMutableNumericData *tempNumericData = [[CPTMutableNumericData alloc] initWithData:tempData
                                                                                                             dataType:dataType
                                                                                                                shape:nil];
-                                
+
                                 [self cacheNumbers:tempNumericData forField:fieldNum atRecordIndex:indexRange.location];
                             }
                             hasData = YES;
                         }
-                            break;
-                            
+                        break;
+
                         case CPTDataOrderColumnsFirst:
                             for ( NSUInteger fieldNum = 0; fieldNum < fieldCount; fieldNum++ ) {
                                 const void *samples = [data samplePointerAtIndex:0, fieldNum];
                                 NSData *tempData    = [[NSData alloc] initWithBytes:samples
                                                                              length:bufferLength];
-                                
+
                                 CPTMutableNumericData *tempNumericData = [[CPTMutableNumericData alloc] initWithData:tempData
                                                                                                             dataType:dataType
                                                                                                                shape:nil];
-                                
+
                                 [self cacheNumbers:tempNumericData forField:fieldNum atRecordIndex:indexRange.location];
                             }
                             hasData = YES;
@@ -671,7 +678,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             }
         }
     }
-    
+
     return hasData;
 }
 
@@ -740,7 +747,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 {
     CPTPlotSymbol *symbol = [self cachedValueForKey:CPTPolarPlotBindingPlotSymbols recordIndex:idx];
 
-    if ( (symbol == nil) || (symbol == [CPTPlot nilData]) ) {
+    if ((symbol == nil) || (symbol == [CPTPlot nilData])) {
         symbol = self.plotSymbol;
     }
 
@@ -760,38 +767,37 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
     CPTLineStyle *lineStyle = self.dataLineStyle;
 
-    if ( self.areaFill || self.areaFill2 || lineStyle.dashPattern || lineStyle.lineFill || (self.interpolation == CPTPolarPlotInterpolationCurved) ) {
+    if ( self.areaFill || self.areaFill2 || lineStyle.dashPattern || lineStyle.lineFill || (self.interpolation == CPTPolarPlotInterpolationCurved)) {
         // show all points to preserve the line dash and area fills
         for ( NSUInteger i = 0; i < dataCount; i++ ) {
             pointDrawFlags[i] = YES;
         }
     }
     else {
-        CPTPlotRangeComparisonResult *majorRangeFlags = malloc( dataCount * sizeof(CPTPlotRangeComparisonResult) );
-        CPTPlotRangeComparisonResult *minorRangeFlags = malloc( dataCount * sizeof(CPTPlotRangeComparisonResult) );
-        CPTPlotRangeComparisonResult *radialRangeFlags = malloc( dataCount * sizeof(CPTPlotRangeComparisonResult) );
-        BOOL *nanFlags                            = malloc( dataCount * sizeof(BOOL) );
+        CPTPlotRangeComparisonResult *majorRangeFlags  = malloc(dataCount * sizeof(CPTPlotRangeComparisonResult));
+        CPTPlotRangeComparisonResult *minorRangeFlags  = malloc(dataCount * sizeof(CPTPlotRangeComparisonResult));
+        CPTPlotRangeComparisonResult *radialRangeFlags = malloc(dataCount * sizeof(CPTPlotRangeComparisonResult));
+        BOOL *nanFlags                                 = malloc(dataCount * sizeof(BOOL));
 
-        CPTPlotRange *majorRange = polarPlotSpace.majorRange;
-        CPTPlotRange *minorRange = polarPlotSpace.minorRange;
+        CPTPlotRange *majorRange  = polarPlotSpace.majorRange;
+        CPTPlotRange *minorRange  = polarPlotSpace.minorRange;
         CPTPlotRange *radialRange = polarPlotSpace.radialRange;
 
         // Determine where each point lies in relation to range
         if ( self.doublePrecisionCache ) {
-            const double *thetaBytes = (const double *)[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle].data.bytes;
+            const double *thetaBytes  = (const double *)[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle].data.bytes;
             const double *radiusBytes = (const double *)[self cachedNumbersForField:CPTPolarPlotFieldRadius].data.bytes;
 
             dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-                
-                const double theta = thetaBytes[i];
+                const double theta  = thetaBytes[i];
                 const double radius = radiusBytes[i];
-                const double x = radius * sin(theta);
-                const double y = radius * cos(theta);
+                const double x      = radius * sin(theta);
+                const double y      = radius * cos(theta);
 
                 CPTPlotRangeComparisonResult majorFlag = [majorRange compareToDouble:x];
                 CPTPlotRangeComparisonResult minorFlag = [minorRange compareToDouble:y];
-                majorRangeFlags[i] = majorFlag;
-                minorRangeFlags[i] = minorFlag;
+                majorRangeFlags[i]                     = majorFlag;
+                minorRangeFlags[i]                     = minorFlag;
                 if ( majorFlag != CPTPlotRangeComparisonResultNumberInRange ) {
                     minorRangeFlags[i] = CPTPlotRangeComparisonResultNumberInRange; // if x is out of range, then y doesn't matter
                 }
@@ -806,21 +812,20 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         }
         else {
             // Determine where each point lies in relation to range
-            const NSDecimal *thetaBytes = (const NSDecimal *)[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle].data.bytes;
+            const NSDecimal *thetaBytes  = (const NSDecimal *)[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle].data.bytes;
             const NSDecimal *radiusBytes = (const NSDecimal *)[self cachedNumbersForField:CPTPolarPlotFieldRadius].data.bytes;
 
             dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-                
-                NSDecimalNumber *_theta = [NSDecimalNumber decimalNumberWithDecimal:thetaBytes[i]];
+                NSDecimalNumber *_theta  = [NSDecimalNumber decimalNumberWithDecimal:thetaBytes[i]];
                 NSDecimalNumber *_radius = [NSDecimalNumber decimalNumberWithDecimal:radiusBytes[i]];
-                
+
                 const double x = [_radius doubleValue] * sin([_theta doubleValue]);
                 const double y = [_radius doubleValue] * cos([_theta doubleValue]);
 
                 CPTPlotRangeComparisonResult xFlag = [majorRange compareToDouble:x];
                 CPTPlotRangeComparisonResult yFlag = [minorRange compareToDouble:y];
-                majorRangeFlags[i] = xFlag;
-                minorRangeFlags[i] = yFlag;
+                majorRangeFlags[i]                 = xFlag;
+                minorRangeFlags[i]                 = yFlag;
                 if ( xFlag != CPTPlotRangeComparisonResultNumberInRange ) {
                     minorRangeFlags[i] = CPTPlotRangeComparisonResultNumberInRange; // if x is out of range, then y doesn't matter
                 }
@@ -831,16 +836,16 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                     radialRangeFlags[i] = [radialRange compareToDecimal:thetaBytes[i]];
                 }
                 nanFlags[i] = isnan(x) || isnan(y) || NSDecimalIsNotANumber(&thetaBytes[i]);
-//                CPTPlotRangeComparisonResult xFlag = [majorRange compareToDecimal:x];
-//                majorRangeFlags[i] = xFlag;
-//                if ( xFlag != CPTPlotRangeComparisonResultNumberInRange ) {
-//                    minorRangeFlags[i] = CPTPlotRangeComparisonResultNumberInRange; // if x is out of range, then y doesn't matter
-//                }
-//                else {
-//                    minorRangeFlags[i] = [minorRange compareToDecimal:y];
-//                }
+// CPTPlotRangeComparisonResult xFlag = [majorRange compareToDecimal:x];
+// majorRangeFlags[i] = xFlag;
+// if ( xFlag != CPTPlotRangeComparisonResultNumberInRange ) {
+// minorRangeFlags[i] = CPTPlotRangeComparisonResultNumberInRange; // if x is out of range, then y doesn't matter
+// }
+// else {
+// minorRangeFlags[i] = [minorRange compareToDecimal:y];
+// }
 //
-//                nanFlags[i] = NSDecimalIsNotANumber(&x) || NSDecimalIsNotANumber(&y);
+// nanFlags[i] = NSDecimalIsNotANumber(&x) || NSDecimalIsNotANumber(&y);
             });
         }
 
@@ -848,7 +853,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         // are included. This ensures no lines are left out that shouldn't be.
         CPTPolarPlotInterpolation theInterpolation = self.interpolation;
 
-        memset( pointDrawFlags, NO, dataCount * sizeof(BOOL) );
+        memset(pointDrawFlags, NO, dataCount * sizeof(BOOL));
         if ( dataCount > 0 ) {
             pointDrawFlags[0] = (majorRangeFlags[0] == CPTPlotRangeComparisonResultNumberInRange &&
                                  minorRangeFlags[0] == CPTPlotRangeComparisonResultNumberInRange &&
@@ -857,10 +862,10 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         }
         if ( visibleOnly ) {
             for ( NSUInteger i = 1; i < dataCount; i++ ) {
-                if ( (majorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
-                     (minorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
+                if ((majorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
+                    (minorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
                     (radialRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
-                     !nanFlags[i] ) {
+                    !nanFlags[i] ) {
                     pointDrawFlags[i] = YES;
                 }
             }
@@ -870,14 +875,14 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                 case CPTPolarPlotInterpolationCurved:
                     // Keep 2 points outside of the visible area on each side to maintain the correct curvature of the line
                     if ( dataCount > 1 ) {
-                        if ( !nanFlags[0] && !nanFlags[1] && ( (majorRangeFlags[0] != majorRangeFlags[1]) || (minorRangeFlags[0] != minorRangeFlags[1]) || (radialRangeFlags[0] != radialRangeFlags[1]) ) ) {
+                        if ( !nanFlags[0] && !nanFlags[1] && ((majorRangeFlags[0] != majorRangeFlags[1]) || (minorRangeFlags[0] != minorRangeFlags[1]) || (radialRangeFlags[0] != radialRangeFlags[1]))) {
                             pointDrawFlags[0] = YES;
                             pointDrawFlags[1] = YES;
                         }
-                        else if ( (majorRangeFlags[1] == CPTPlotRangeComparisonResultNumberInRange) &&
-                                  (minorRangeFlags[1] == CPTPlotRangeComparisonResultNumberInRange) &&
+                        else if ((majorRangeFlags[1] == CPTPlotRangeComparisonResultNumberInRange) &&
+                                 (minorRangeFlags[1] == CPTPlotRangeComparisonResultNumberInRange) &&
                                  (radialRangeFlags[1] == CPTPlotRangeComparisonResultNumberInRange) &&
-                                  !nanFlags[1] ) {
+                                 !nanFlags[1] ) {
                             pointDrawFlags[1] = YES;
                         }
                     }
@@ -888,15 +893,15 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                             pointDrawFlags[i - 1] = YES;
                             pointDrawFlags[i]     = YES;
                         }
-                        else if ( !nanFlags[i - 1] && !nanFlags[i] && ( (majorRangeFlags[i - 1] != majorRangeFlags[i]) || (minorRangeFlags[i - 1] != minorRangeFlags[i]) || (radialRangeFlags[i - 1] != radialRangeFlags[i]) ) ) {
+                        else if ( !nanFlags[i - 1] && !nanFlags[i] && ((majorRangeFlags[i - 1] != majorRangeFlags[i]) || (minorRangeFlags[i - 1] != minorRangeFlags[i]) || (radialRangeFlags[i - 1] != radialRangeFlags[i]))) {
                             pointDrawFlags[i - 2] = YES;
                             pointDrawFlags[i - 1] = YES;
                             pointDrawFlags[i]     = YES;
                         }
-                        else if ( (majorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
-                                  (minorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
+                        else if ((majorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
+                                 (minorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
                                  (radialRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
-                                  !nanFlags[i] ) {
+                                 !nanFlags[i] ) {
                             pointDrawFlags[i] = YES;
                         }
                     }
@@ -905,14 +910,14 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                 default:
                     // Keep 1 point outside of the visible area on each side
                     for ( NSUInteger i = 1; i < dataCount; i++ ) {
-                        if ( !nanFlags[i - 1] && !nanFlags[i] && ( (majorRangeFlags[i - 1] != majorRangeFlags[i]) || (minorRangeFlags[i - 1] != minorRangeFlags[i]) ) ) {
+                        if ( !nanFlags[i - 1] && !nanFlags[i] && ((majorRangeFlags[i - 1] != majorRangeFlags[i]) || (minorRangeFlags[i - 1] != minorRangeFlags[i]))) {
                             pointDrawFlags[i - 1] = YES;
                             pointDrawFlags[i]     = YES;
                         }
-                        else if ( (majorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
-                                  (minorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
+                        else if ((majorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
+                                 (minorRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
                                  (radialRangeFlags[i] == CPTPlotRangeComparisonResultNumberInRange) &&
-                                  !nanFlags[i] ) {
+                                 !nanFlags[i] ) {
                             pointDrawFlags[i] = YES;
                         }
                     }
@@ -933,83 +938,82 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
     // Calculate points
     if ( self.doublePrecisionCache ) {
-        const double *thetaBytes = (const double *)[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle].data.bytes;
+        const double *thetaBytes  = (const double *)[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle].data.bytes;
         const double *radiusBytes = (const double *)[self cachedNumbersForField:CPTPolarPlotFieldRadius].data.bytes;
 
         dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-//            const double x = radiusBytes[i] * sin(thetaBytes[i]);
-//            const double y = radiusBytes[i] * cos(thetaBytes[i]);
-            const double theta = thetaBytes[i];
+// const double x = radiusBytes[i] * sin(thetaBytes[i]);
+// const double y = radiusBytes[i] * cos(thetaBytes[i]);
+            const double theta  = thetaBytes[i];
             const double radius = radiusBytes[i];
             if ( !drawPointFlags[i] || isnan(radius) || isnan(theta) /*|| isnan(x) || isnan(y)*/ ) {
                 viewPoints[i] = CPTPointMake(NAN, NAN);
             }
             else {
                 double plotPoint[2];
-//                plotPoint[CPTCoordinateX] = x;
-//                plotPoint[CPTCoordinateY] = y;
+// plotPoint[CPTCoordinateX] = x;
+// plotPoint[CPTCoordinateY] = y;
                 plotPoint[CPTCoordinateX] = radius;
                 plotPoint[CPTCoordinateY] = 0.0;
-                
+
                 double centrePlotPoint[2];
                 centrePlotPoint[CPTCoordinateX] = 0.0;
                 centrePlotPoint[CPTCoordinateY] = 0.0;
-                
+
                 CGPoint centrePoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:centrePlotPoint numberOfCoordinates:2];
-                CGPoint viewPoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
-                viewPoints[i] = CPTPointMake((viewPoint.x - centrePoint.x) * sin(theta) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos(theta) + centrePoint.y);
-//                viewPoints[i] = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
+                CGPoint viewPoint   = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
+                viewPoints[i]       = CPTPointMake((viewPoint.x - centrePoint.x) * sin(theta) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos(theta) + centrePoint.y);
+// viewPoints[i] = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
             }
         });
     }
     else {
-        CPTMutableNumericData *thetaData = [self cachedNumbersForField:CPTPolarPlotFieldRadialAngle];
+        CPTMutableNumericData *thetaData  = [self cachedNumbersForField:CPTPolarPlotFieldRadialAngle];
         CPTMutableNumericData *radiusData = [self cachedNumbersForField:CPTPolarPlotFieldRadius];
-        
-        const NSDecimal *thetaBytes = (const NSDecimal *)thetaData.data.bytes;
+
+        const NSDecimal *thetaBytes  = (const NSDecimal *)thetaData.data.bytes;
         const NSDecimal *radiusBytes = (const NSDecimal *)radiusData.data.bytes;
 
         dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-            
-            NSDecimalNumber *_theta = [NSDecimalNumber decimalNumberWithDecimal:thetaBytes[i]];
+            NSDecimalNumber *_theta  = [NSDecimalNumber decimalNumberWithDecimal:thetaBytes[i]];
             NSDecimalNumber *_radius = [NSDecimalNumber decimalNumberWithDecimal:radiusBytes[i]];
-            
-//            const double x = [_radius doubleValue] * sin([_theta doubleValue]);
-//            const double y = [_radius doubleValue] * cos([_theta doubleValue]);
-            const double theta = [_theta doubleValue];
+
+// const double x = [_radius doubleValue] * sin([_theta doubleValue]);
+// const double y = [_radius doubleValue] * cos([_theta doubleValue]);
+            const double theta  = [_theta doubleValue];
             const double radius = [_radius doubleValue];
             if ( !drawPointFlags[i] || isnan(radius) || isnan(theta) /*|| isnan(x) || isnan(y)*/ ) {
                 viewPoints[i] = CPTPointMake(NAN, NAN);
             }
             else {
                 double plotPoint[2];
-//                plotPoint[CPTCoordinateX] = x;
-//                plotPoint[CPTCoordinateY] = y;
+// plotPoint[CPTCoordinateX] = x;
+// plotPoint[CPTCoordinateY] = y;
                 plotPoint[CPTCoordinateX] = radius;
                 plotPoint[CPTCoordinateY] = 0.0;
-                
+
                 double centrePlotPoint[2];
                 centrePlotPoint[CPTCoordinateX] = 0.0;
                 centrePlotPoint[CPTCoordinateY] = 0.0;
-                
+
                 CGPoint centrePoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:centrePlotPoint numberOfCoordinates:2];
-                CGPoint viewPoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
-                viewPoints[i] = CPTPointMake((viewPoint.x - centrePoint.x) * sin(theta) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos(theta) + centrePoint.y);
-//                viewPoints[i] = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
+                CGPoint viewPoint   = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
+                viewPoints[i]       = CPTPointMake((viewPoint.x - centrePoint.x) * sin(theta) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos(theta) + centrePoint.y);
+// viewPoints[i] = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
             }
-            
-//            const NSDecimal x = radiusBytes[i] * sin(thetaBytes[i]);
-//            const NSDecimal y = radiusBytes[i] * cos(thetaBytes[i]);
-//            if ( !drawPointFlags[i] || NSDecimalIsNotANumber(&x) || NSDecimalIsNotANumber(&y) ) {
-//                viewPoints[i] = CPTPointMake(NAN, NAN);
-//            }
-//            else {
-//                NSDecimal plotPoint[2];
-//                plotPoint[CPTCoordinateX] = x;
-//                plotPoint[CPTCoordinateY] = y;
+
+// const NSDecimal x = radiusBytes[i] * sin(thetaBytes[i]);
+// const NSDecimal y = radiusBytes[i] * cos(thetaBytes[i]);
+// if ( !drawPointFlags[i] || NSDecimalIsNotANumber(&x) || NSDecimalIsNotANumber(&y) ) {
+// viewPoints[i] = CPTPointMake(NAN, NAN);
+// }
+// else {
+// NSDecimal plotPoint[2];
+// plotPoint[CPTCoordinateX] = x;
+// plotPoint[CPTCoordinateY] = y;
 //
-//                viewPoints[i] = [thePlotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
-//            }
+// viewPoints[i] = [thePlotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
+// }
         });
     }
 }
@@ -1018,7 +1022,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 {
     // Align to device pixels if there is a data line.
     // Otherwise, align to view space, so fills are sharp at edges.
-    if ( self.dataLineStyle.lineWidth > CPTFloat(0.0) ) {
+    if ( self.dataLineStyle.lineWidth > CPTFloat(0.0)) {
         dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
             if ( drawPointFlags[i] ) {
                 viewPoints[i] = CPTAlignPointToUserSpace(context, viewPoints[i]);
@@ -1046,7 +1050,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                 result = i;
                 break;
             }
-            if ( (delta < 0) && (i == 0) ) {
+            if ((delta < 0) && (i == 0)) {
                 break;
             }
         }
@@ -1075,19 +1079,20 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 -(NSUInteger)indexOfVisiblePointClosestToPlotAreaPoint:(CGPoint)viewPoint
 {
     NSUInteger dataCount = self.cachedDataCount;
-    CGPoint *viewPoints  = calloc( dataCount, sizeof(CGPoint) );
-    BOOL *drawPointFlags = calloc( dataCount, sizeof(BOOL) );
+    CGPoint *viewPoints  = calloc(dataCount, sizeof(CGPoint));
+    BOOL *drawPointFlags = calloc(dataCount, sizeof(BOOL));
 
     [self calculatePointsToDraw:drawPointFlags forPlotSpace:(id)self.plotSpace includeVisiblePointsOnly:YES numberOfPoints:dataCount];
     [self calculateViewPoints:viewPoints withDrawPointFlags:drawPointFlags numberOfPoints:dataCount];
 
     NSInteger result = [self extremeDrawnPointIndexForFlags:drawPointFlags numberOfPoints:dataCount extremeNumIsLowerBound:YES];
+
     if ( result != NSNotFound ) {
         CGFloat minimumDistanceSquared = CPTNAN;
         for ( NSUInteger i = (NSUInteger)result; i < dataCount; ++i ) {
             if ( drawPointFlags[i] ) {
                 CGFloat distanceSquared = squareOfDistanceBetweenPoints(viewPoint, viewPoints[i]);
-                if ( isnan(minimumDistanceSquared) || (distanceSquared < minimumDistanceSquared) ) {
+                if ( isnan(minimumDistanceSquared) || (distanceSquared < minimumDistanceSquared)) {
                     minimumDistanceSquared = distanceSquared;
                     result                 = (NSInteger)i;
                 }
@@ -1117,44 +1122,43 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         double plotPolar[2];
         double plotPoint[2];
         plotPolar[CPTPolarPlotFieldRadialAngle] = [self cachedDoubleForField:CPTPolarPlotFieldRadialAngle recordIndex:idx];
-        plotPolar[CPTPolarPlotFieldRadius] = [self cachedDoubleForField:CPTPolarPlotFieldRadius recordIndex:idx];
-//        plotPoint[CPTPolarPlotCoordinatesX] = plotPolar[CPTPolarPlotFieldRadius] * sin(plotPolar[CPTPolarPlotFieldRadialAngle]);
-//        plotPoint[CPTPolarPlotCoordinatesY] = plotPolar[CPTPolarPlotFieldRadius] * cos(plotPolar[CPTPolarPlotFieldRadialAngle]);
+        plotPolar[CPTPolarPlotFieldRadius]      = [self cachedDoubleForField:CPTPolarPlotFieldRadius recordIndex:idx];
+// plotPoint[CPTPolarPlotCoordinatesX] = plotPolar[CPTPolarPlotFieldRadius] * sin(plotPolar[CPTPolarPlotFieldRadialAngle]);
+// plotPoint[CPTPolarPlotCoordinatesY] = plotPolar[CPTPolarPlotFieldRadius] * cos(plotPolar[CPTPolarPlotFieldRadialAngle]);
         plotPoint[CPTPolarPlotCoordinatesX] = plotPolar[CPTPolarPlotFieldRadius];
         plotPoint[CPTPolarPlotCoordinatesY] = 0.0;
-        
+
         double centrePlotPoint[2];
         centrePlotPoint[CPTPolarPlotCoordinatesX] = 0.0;
         centrePlotPoint[CPTPolarPlotCoordinatesY] = 0.0;
-        
+
         centrePoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:centrePlotPoint numberOfCoordinates:2];
-        viewPoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
-        viewPoint = CPTPointMake((viewPoint.x - centrePoint.x) * sin(plotPolar[CPTPolarPlotFieldRadialAngle]) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos(plotPolar[CPTPolarPlotFieldRadialAngle]) + centrePoint.y);
-//        viewPoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
+        viewPoint   = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
+        viewPoint   = CPTPointMake((viewPoint.x - centrePoint.x) * sin(plotPolar[CPTPolarPlotFieldRadialAngle]) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos(plotPolar[CPTPolarPlotFieldRadialAngle]) + centrePoint.y);
+// viewPoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
     }
     else {
-        
         NSDecimal plotPolar[2];
         NSDecimal plotPoint[2];
         plotPolar[CPTPolarPlotFieldRadialAngle] = [self cachedDecimalForField:CPTPolarPlotFieldRadialAngle recordIndex:idx];
-        plotPolar[CPTPolarPlotFieldRadius] = [self cachedDecimalForField:CPTPolarPlotFieldRadius recordIndex:idx];
-        
-        NSDecimalNumber *_theta = [NSDecimalNumber decimalNumberWithDecimal:plotPolar[CPTPolarPlotFieldRadialAngle]];
+        plotPolar[CPTPolarPlotFieldRadius]      = [self cachedDecimalForField:CPTPolarPlotFieldRadius recordIndex:idx];
+
+        NSDecimalNumber *_theta  = [NSDecimalNumber decimalNumberWithDecimal:plotPolar[CPTPolarPlotFieldRadialAngle]];
         NSDecimalNumber *_radius = [NSDecimalNumber decimalNumberWithDecimal:plotPolar[CPTPolarPlotFieldRadius]];
-        
-//        plotPoint[CPTPolarPlotCoordinatesX] = [[NSDecimalNumber numberWithDouble:[_radius doubleValue] * sin([_theta doubleValue])] decimalValue];
-//        plotPoint[CPTPolarPlotCoordinatesY] = [[NSDecimalNumber numberWithDouble:[_radius doubleValue] * cos([_theta doubleValue])] decimalValue];
+
+// plotPoint[CPTPolarPlotCoordinatesX] = [[NSDecimalNumber numberWithDouble:[_radius doubleValue] * sin([_theta doubleValue])] decimalValue];
+// plotPoint[CPTPolarPlotCoordinatesY] = [[NSDecimalNumber numberWithDouble:[_radius doubleValue] * cos([_theta doubleValue])] decimalValue];
         plotPoint[CPTPolarPlotCoordinatesX] = [[NSDecimalNumber numberWithDouble:[_radius doubleValue]] decimalValue];
         plotPoint[CPTPolarPlotCoordinatesY] = [[NSDecimalNumber numberWithDouble:0.0] decimalValue];
 
         NSDecimal centrePlotPoint[2];
         centrePlotPoint[CPTPolarPlotCoordinatesX] = [[NSDecimalNumber numberWithDouble:0.0] decimalValue];
         centrePlotPoint[CPTPolarPlotCoordinatesY] = [[NSDecimalNumber numberWithDouble:0.0] decimalValue];
-        
+
         centrePoint = [thePlotSpace plotAreaViewPointForPlotPoint:centrePlotPoint numberOfCoordinates:2];
-        viewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
-        viewPoint = CPTPointMake((viewPoint.x - centrePoint.x) * sin([_theta doubleValue]) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos([_theta doubleValue]) + centrePoint.y);
-//        viewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
+        viewPoint   = [thePlotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
+        viewPoint   = CPTPointMake((viewPoint.x - centrePoint.x) * sin([_theta doubleValue]) + centrePoint.x, (viewPoint.x - centrePoint.x) * cos([_theta doubleValue]) + centrePoint.y);
+// viewPoint = [thePlotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
     }
 
     return viewPoint;
@@ -1170,18 +1174,19 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     if ( self.hidden ) {
         return;
     }
-    
-    CPTMutableNumericData *thetaValueData = [self cachedNumbersForField:CPTPolarPlotFieldRadialAngle];
+
+    CPTMutableNumericData *thetaValueData  = [self cachedNumbersForField:CPTPolarPlotFieldRadialAngle];
     CPTMutableNumericData *radiusValueData = [self cachedNumbersForField:CPTPolarPlotFieldRadius];
 
-    if ( (thetaValueData == nil) || (radiusValueData == nil) ) {
+    if ((thetaValueData == nil) || (radiusValueData == nil)) {
         return;
     }
     NSUInteger dataCount = self.cachedDataCount;
+
     if ( dataCount == 0 ) {
         return;
     }
-    if ( !(self.dataLineStyle || self.areaFill || self.areaFill2 || self.plotSymbol || self.plotSymbols.count) ) {
+    if ( !(self.dataLineStyle || self.areaFill || self.areaFill2 || self.plotSymbol || self.plotSymbols.count)) {
         return;
     }
     if ( thetaValueData.numberOfSamples != radiusValueData.numberOfSamples ) {
@@ -1191,29 +1196,32 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     [super renderAsVectorInContext:context];
 
     // Calculate view points, and align to user space
-    CGPoint *viewPoints  = malloc( dataCount * sizeof(CGPoint) );
-    BOOL *drawPointFlags = malloc( dataCount * sizeof(BOOL) );
+    CGPoint *viewPoints  = malloc(dataCount * sizeof(CGPoint));
+    BOOL *drawPointFlags = malloc(dataCount * sizeof(BOOL));
 
     CPTPolarPlotSpace *thePlotSpace = (CPTPolarPlotSpace *)self.plotSpace;
+
     [self calculatePointsToDraw:drawPointFlags forPlotSpace:thePlotSpace includeVisiblePointsOnly:NO numberOfPoints:dataCount];
     [self calculateViewPoints:viewPoints withDrawPointFlags:drawPointFlags numberOfPoints:dataCount];
 
     BOOL pixelAlign = self.alignsPointsToPixels;
+
     if ( pixelAlign ) {
         [self alignViewPointsToUserSpace:viewPoints withContext:context drawPointFlags:drawPointFlags numberOfPoints:dataCount];
     }
-    
+
     CGPoint centrePoint = [self translatedPolarCoordinatesToContextCoordinatesWithFromTheta:[[NSDecimalNumber numberWithDouble:0.0] decimalValue] Radius:[[NSDecimalNumber numberWithDouble:0.0] decimalValue]];
+
     if ( pixelAlign ) {
         centrePoint = CPTAlignIntegralPointToUserSpace(context, centrePoint);
     }
-    
+
     // Get extreme points
     NSInteger lastDrawnPointIndex  = [self extremeDrawnPointIndexForFlags:drawPointFlags numberOfPoints:dataCount extremeNumIsLowerBound:NO];
     NSInteger firstDrawnPointIndex = [self extremeDrawnPointIndexForFlags:drawPointFlags numberOfPoints:dataCount extremeNumIsLowerBound:YES];
 
     if ( firstDrawnPointIndex != NSNotFound ) {
-        NSRange viewIndexmajorRange = NSMakeRange( (NSUInteger)firstDrawnPointIndex, (NSUInteger)(lastDrawnPointIndex - firstDrawnPointIndex + 1) );
+        NSRange viewIndexmajorRange = NSMakeRange((NSUInteger)firstDrawnPointIndex, (NSUInteger)(lastDrawnPointIndex - firstDrawnPointIndex + 1));
 
         CPTLineStyle *theLineStyle          = self.dataLineStyle;
         CPTMutableLimitBandArray *fillBands = self.mutableAreaFillBands;
@@ -1221,20 +1229,21 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         // Draw fills
         NSDecimal theAreaBaseValue;
         CPTFill *theFill = nil;
-        
-        CGFloat height = CPTFloat( CGBitmapContextGetHeight(context) );
-        CGFloat width = CPTFloat( CGBitmapContextGetWidth(context) );
-        
-        double centreToTopLeft = sqrt(pow((double)centrePoint.x, 2.0) + pow((double)height-(double)centrePoint.y, 2.0));
-        double centreToTopRight = sqrt(pow((double)width-(double)centrePoint.x, 2.0) + pow((double)height-(double)centrePoint.y, 2.0));
-        double centreToBtmRight = sqrt(pow((double)width-(double)centrePoint.x, 2.0) + pow((double)centrePoint.y, 2.0));
-        double centreToBtmLeft = sqrt(pow((double)centrePoint.x, 2.0) + pow((double)centrePoint.y, 2.0));
-        
+
+        CGFloat height = CPTFloat(CGBitmapContextGetHeight(context));
+        CGFloat width  = CPTFloat(CGBitmapContextGetWidth(context));
+
+        double centreToTopLeft  = sqrt(pow((double)centrePoint.x, 2.0) + pow((double)height - (double)centrePoint.y, 2.0));
+        double centreToTopRight = sqrt(pow((double)width - (double)centrePoint.x, 2.0) + pow((double)height - (double)centrePoint.y, 2.0));
+        double centreToBtmRight = sqrt(pow((double)width - (double)centrePoint.x, 2.0) + pow((double)centrePoint.y, 2.0));
+        double centreToBtmLeft  = sqrt(pow((double)centrePoint.x, 2.0) + pow((double)centrePoint.y, 2.0));
+
         double maxLength = centreToTopLeft > centreToTopRight ? centreToTopLeft : centreToTopRight;
         maxLength = centreToBtmRight > maxLength ? centreToBtmRight : maxLength;
-        if(centreToBtmLeft > maxLength)
+        if ( centreToBtmLeft > maxLength ) {
             maxLength = centreToBtmLeft;
-        
+        }
+
         for ( NSUInteger i = 0; i < 2; i++ ) {
             switch ( i ) {
                 case 0:
@@ -1251,8 +1260,8 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                     theAreaBaseValue = CPTDecimalNaN();
                     break;
             }
-            if ( !NSDecimalIsNotANumber(&theAreaBaseValue) ) {
-                if ( theFill || ( (i == 0) && fillBands ) ) {
+            if ( !NSDecimalIsNotANumber(&theAreaBaseValue)) {
+                if ( theFill || ((i == 0) && fillBands)) {
                     // clear the plot shadow if any--not needed for fills when the plot has a data line
                     if ( theLineStyle ) {
                         CGContextSaveGState(context);
@@ -1263,78 +1272,82 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                     if ( pixelAlign ) {
                         baseLinePoint = CPTAlignIntegralPointToUserSpace(context, baseLinePoint);
                     }
-                    
-                    CGFloat baselineRadiusValue = (CGFloat)sqrt((baseLinePoint.x-centrePoint.x)*(baseLinePoint.x-centrePoint.x)+(baseLinePoint.y-centrePoint.y)*(baseLinePoint.y-centrePoint.y));
-                    
-                    CGPathRef dataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:viewIndexmajorRange baselineRadiusValue:baselineRadiusValue centrePoint:centrePoint];
-                    
-                    if ( theFill ) {
 
+                    CGFloat baselineRadiusValue = (CGFloat)sqrt((baseLinePoint.x - centrePoint.x) * (baseLinePoint.x - centrePoint.x) + (baseLinePoint.y - centrePoint.y) * (baseLinePoint.y - centrePoint.y));
+
+                    CGPathRef dataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:viewIndexmajorRange baselineRadiusValue:baselineRadiusValue centrePoint:centrePoint];
+
+                    if ( theFill ) {
                         CGFloat startAngle = (CGFloat)[[thetaValueData sampleValue:(NSUInteger)firstDrawnPointIndex] floatValue];
-                        CGFloat endAngle = (CGFloat)[[thetaValueData sampleValue:(NSUInteger)lastDrawnPointIndex] floatValue];
-                        
-//                        CGPoint firstPointAtBaselineRadius = CGPointMake(baselineRadiusValue*sin(startAngle)+centrePoint.x, baselineRadiusValue*cos(startAngle)+centrePoint.y);
-//                        if ( pixelAlign ) {
-//                            firstPointAtBaselineRadius = CPTAlignIntegralPointToUserSpace(context, firstPointAtBaselineRadius);
-//                        }
-//                        
-//                        CGPoint lastPointAtBaselineRadius = CGPointMake(baselineRadiusValue*sin(endAngle)+centrePoint.x, baselineRadiusValue*cos(endAngle)+centrePoint.y);
-//                        if ( pixelAlign ) {
-//                            lastPointAtBaselineRadius = CPTAlignIntegralPointToUserSpace(context, lastPointAtBaselineRadius);
-//                        }
-                        
-//                        CGPoint firstOuterPoint = CGPointMake(maxLength * sin(startAngle)+centrePoint.x, maxLength * cos(startAngle)+centrePoint.y);
-//                        CGPoint lastOuterPoint = CGPointMake(maxLength * sin(endAngle)+centrePoint.x, maxLength * cos(endAngle)+centrePoint.y);
-//                        
+                        CGFloat endAngle   = (CGFloat)[[thetaValueData sampleValue:(NSUInteger)lastDrawnPointIndex] floatValue];
+
+// CGPoint firstPointAtBaselineRadius = CGPointMake(baselineRadiusValue*sin(startAngle)+centrePoint.x, baselineRadiusValue*cos(startAngle)+centrePoint.y);
+// if ( pixelAlign ) {
+// firstPointAtBaselineRadius = CPTAlignIntegralPointToUserSpace(context, firstPointAtBaselineRadius);
+// }
+//
+// CGPoint lastPointAtBaselineRadius = CGPointMake(baselineRadiusValue*sin(endAngle)+centrePoint.x, baselineRadiusValue*cos(endAngle)+centrePoint.y);
+// if ( pixelAlign ) {
+// lastPointAtBaselineRadius = CPTAlignIntegralPointToUserSpace(context, lastPointAtBaselineRadius);
+// }
+
+// CGPoint firstOuterPoint = CGPointMake(maxLength * sin(startAngle)+centrePoint.x, maxLength * cos(startAngle)+centrePoint.y);
+// CGPoint lastOuterPoint = CGPointMake(maxLength * sin(endAngle)+centrePoint.x, maxLength * cos(endAngle)+centrePoint.y);
+//
                         CGPoint firstPoint = [self translatedPolarCoordinatesToContextCoordinatesWithFromTheta:[[thetaValueData sampleValue:(NSUInteger)firstDrawnPointIndex] decimalValue] Radius:[[radiusValueData sampleValue:(NSUInteger)firstDrawnPointIndex] decimalValue]];
                         if ( pixelAlign ) {
                             firstPoint = CPTAlignIntegralPointToUserSpace(context, firstPoint);
                         }
-                        
+
                         CGPoint lastPoint = [self translatedPolarCoordinatesToContextCoordinatesWithFromTheta:[[thetaValueData sampleValue:(NSUInteger)lastDrawnPointIndex] decimalValue] Radius:[[radiusValueData sampleValue:(NSUInteger)lastDrawnPointIndex] decimalValue]];
                         if ( pixelAlign ) {
                             lastPoint = CPTAlignIntegralPointToUserSpace(context, lastPoint);
                         }
-                        
+
                         CGContextSaveGState(context);
-                        
+
                         CGMutablePathRef baseLinePath = CGPathCreateMutable();
-                        
-                        
-                        if (baselineRadiusValue != 0.0) {
+
+                        if ( baselineRadiusValue != 0.0 ) {
                             CGFloat startAngleToTop, endAngleToTop;
                             CGFloat diff = 0.0;
-                            if(startAngle >= (CGFloat)0.0 && startAngle < (CGFloat)M_PI && endAngle >= (CGFloat)0.0 && endAngle < (CGFloat)M_PI)
+                            if ((startAngle >= (CGFloat)0.0) && (startAngle < (CGFloat)M_PI) && (endAngle >= (CGFloat)0.0) && (endAngle < (CGFloat)M_PI)) {
                                 diff = startAngle - endAngle;
-                            else if(startAngle >= (CGFloat)M_PI && startAngle < (CGFloat)(2.0*M_PI) && endAngle >= (CGFloat)M_PI && endAngle < (CGFloat)(2.0*M_PI))
+                            }
+                            else if ((startAngle >= (CGFloat)M_PI) && (startAngle < (CGFloat)(2.0 * M_PI)) && (endAngle >= (CGFloat)M_PI) && (endAngle < (CGFloat)(2.0 * M_PI))) {
                                 diff = endAngle - startAngle;
+                            }
                             else {
-                                if(startAngle < (CGFloat)M_PI)
+                                if ( startAngle < (CGFloat)M_PI ) {
                                     startAngleToTop = startAngle;
-                                else
-                                    startAngleToTop = (CGFloat)(2.0*M_PI) - startAngle;
-                                
-                                if(endAngle < (CGFloat)M_PI)
+                                }
+                                else {
+                                    startAngleToTop = (CGFloat)(2.0 * M_PI) - startAngle;
+                                }
+
+                                if ( endAngle < (CGFloat)M_PI ) {
                                     endAngleToTop = endAngle;
-                                else
-                                    endAngleToTop = (CGFloat)(2.0*M_PI) - endAngle;
-                                
+                                }
+                                else {
+                                    endAngleToTop = (CGFloat)(2.0 * M_PI) - endAngle;
+                                }
+
                                 diff = endAngleToTop - startAngleToTop;
                             }
-                            
-                            CGPathAddArc(baseLinePath, NULL, centrePoint.x, centrePoint.y, baselineRadiusValue, startAngle+diff-(CGFloat)(M_PI_2*3.0), endAngle+diff-(CGFloat)(M_PI_2*3.0), NO);
-                            
-                            if( firstPoint.x != lastPoint.x && firstPoint.y != lastPoint.y) {
+
+                            CGPathAddArc(baseLinePath, NULL, centrePoint.x, centrePoint.y, baselineRadiusValue, startAngle + diff - (CGFloat)(M_PI_2 * 3.0), endAngle + diff - (CGFloat)(M_PI_2 * 3.0), NO);
+
+                            if ((firstPoint.x != lastPoint.x) && (firstPoint.y != lastPoint.y)) {
                                 CGPathMoveToPoint(baseLinePath, NULL, firstPoint.x, firstPoint.y);
                                 CGPathAddLineToPoint(baseLinePath, NULL, centrePoint.x, centrePoint.y);
                                 CGPathAddLineToPoint(baseLinePath, NULL, lastPoint.x, lastPoint.y);
-//                                if( firstPointAtBaselineRadius.x != lastPointAtBaselineRadius.x && firstPointAtBaselineRadius.y != lastPointAtBaselineRadius.y) {
-//                                    CGPathMoveToPoint(baseLinePath, NULL, firstPointAtBaselineRadius.x, firstPointAtBaselineRadius.y);
-//                                    CGPathAddLineToPoint(baseLinePath, NULL, firstPoint.x, firstPoint.y);
-//                                    CGPathMoveToPoint(baseLinePath, NULL, lastPointAtBaselineRadius.x, lastPointAtBaselineRadius.y);
-//                                    CGPathAddLineToPoint(baseLinePath, NULL, lastPoint.x, lastPoint.y);
-//                                    CGPathAddLineToPoint(baseLinePath, NULL, firstPoint.x, firstPoint.y);
-//                                }
+// if( firstPointAtBaselineRadius.x != lastPointAtBaselineRadius.x && firstPointAtBaselineRadius.y != lastPointAtBaselineRadius.y) {
+// CGPathMoveToPoint(baseLinePath, NULL, firstPointAtBaselineRadius.x, firstPointAtBaselineRadius.y);
+// CGPathAddLineToPoint(baseLinePath, NULL, firstPoint.x, firstPoint.y);
+// CGPathMoveToPoint(baseLinePath, NULL, lastPointAtBaselineRadius.x, lastPointAtBaselineRadius.y);
+// CGPathAddLineToPoint(baseLinePath, NULL, lastPoint.x, lastPoint.y);
+// CGPathAddLineToPoint(baseLinePath, NULL, firstPoint.x, firstPoint.y);
+// }
                             }
                         }
                         else {
@@ -1342,57 +1355,53 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                             CGPathAddLineToPoint(baseLinePath, NULL, centrePoint.x, centrePoint.y);
                             CGPathAddLineToPoint(baseLinePath, NULL, firstPoint.x, firstPoint.y);
                         }
-                        
+
                         CGContextAddPath(context, baseLinePath);
-                        
+
                         // Draw stroke path
                         CGContextSetRGBStrokeColor(context, 0.0, 0.0, 0.0, 1.0);
                         CGContextSetLineWidth(context, 0.5);
                         CGContextDrawPath(context, kCGPathStroke);
-                        
+
                         CGContextRestoreGState(context);
-                        
+
                         CGContextClip(context);
-                        
- //                       CGPathCloseSubpath(dataLinePath);
-                        
+
+                        // CGPathCloseSubpath(dataLinePath);
+
                         CGContextBeginPath(context);
                         CGContextAddPath(context, dataLinePath);
                         CGContextAddPath(context, baseLinePath);
                         [theFill fillPathInContext:context];
-                        
-                        
+
                         CGPathRelease(baseLinePath);
                     }
 
                     // Draw fill bands
-                    if ( (i == 0) && fillBands ) {
-                        
-
-                        for ( CPTLimitBand *band in fillBands )
-                        {
+                    if ((i == 0) && fillBands ) {
+                        for ( CPTLimitBand *band in fillBands ) {
                             CGContextSaveGState(context);
                             CPTPlotRange *bandRange = band.range;
-                            if(((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)
-                                bandRange = [CPTPlotRange plotRangeWithLocation:[NSNumber numberWithDouble:bandRange.locationDouble*M_PI/180.0] length:[NSNumber numberWithDouble:bandRange.lengthDouble*M_PI/180.0]];
-                            
-                            
+                            if (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees ) {
+                                bandRange = [CPTPlotRange plotRangeWithLocation:[NSNumber numberWithDouble:bandRange.locationDouble * M_PI / 180.0] length:[NSNumber numberWithDouble:bandRange.lengthDouble * M_PI / 180.0]];
+                            }
+
                             CGMutablePathRef clippedBandAreaPath = CGPathCreateMutable();
                             CGPathMoveToPoint(clippedBandAreaPath, NULL, centrePoint.x, centrePoint.y);
                             CGPathAddLineToPoint(clippedBandAreaPath, NULL, centrePoint.x + (CGFloat)(sin(bandRange.maxLimitDouble) * maxLength), centrePoint.y + (CGFloat)(cos(bandRange.maxLimitDouble) * maxLength));
                             CGPathAddLineToPoint(clippedBandAreaPath, NULL, centrePoint.x + (CGFloat)(sin(bandRange.minLimitDouble) * maxLength), centrePoint.y + (CGFloat)(cos(bandRange.minLimitDouble) * maxLength));
                             CGPathAddLineToPoint(clippedBandAreaPath, NULL, centrePoint.x, centrePoint.y);
-                            
+
                             CGContextAddPath(context, clippedBandAreaPath);
                             CGContextClip(context);
-                            
-//                            CGPathCloseSubpath(dataLinePath);
-                            
+
+// CGPathCloseSubpath(dataLinePath);
+
                             CGContextBeginPath(context);
                             CGContextAddPath(context, dataLinePath);
                             [band.fill fillPathInContext:context];
                             CGContextRestoreGState(context);
-                        
+
                             CGPathRelease(clippedBandAreaPath);
                         }
                     }
@@ -1458,21 +1467,22 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     free(drawPointFlags);
 }
 
-- (CGPoint)translatedPolarCoordinatesToContextCoordinatesWithFromTheta:(NSDecimal)thetaValue Radius:(NSDecimal)radiusValue
+-(CGPoint)translatedPolarCoordinatesToContextCoordinatesWithFromTheta:(NSDecimal)thetaValue Radius:(NSDecimal)radiusValue
 {
     NSDecimal plotPoint[2];
     NSDecimal plotPolar[2];
+
     plotPolar[CPTPolarPlotFieldRadialAngle] = thetaValue;
-    plotPolar[CPTPolarPlotFieldRadius] = radiusValue;
-    
-    NSDecimalNumber *_theta = [NSDecimalNumber decimalNumberWithDecimal:plotPolar[CPTPolarPlotFieldRadialAngle]];
+    plotPolar[CPTPolarPlotFieldRadius]      = radiusValue;
+
+    NSDecimalNumber *_theta  = [NSDecimalNumber decimalNumberWithDecimal:plotPolar[CPTPolarPlotFieldRadialAngle]];
     NSDecimalNumber *_radius = [NSDecimalNumber decimalNumberWithDecimal:plotPolar[CPTPolarPlotFieldRadius]];
-    
+
     plotPoint[CPTPolarPlotCoordinatesX] = [[NSDecimalNumber numberWithDouble:[_radius doubleValue] * sin([_theta doubleValue])] decimalValue];
     plotPoint[CPTPolarPlotCoordinatesY] = [[NSDecimalNumber numberWithDouble:[_radius doubleValue] * cos([_theta doubleValue])] decimalValue];
-    
+
     CGPoint point = [self convertPoint:[self.plotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2] fromLayer:self.plotArea];
-    
+
     return point;
 }
 
@@ -1489,7 +1499,6 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     CGPoint firstPoint             = CGPointZero;
     CGPoint lastPoint              = CGPointZero;
     NSUInteger lastDrawnPointIndex = NSMaxRange(indexRange);
-    
 
     if ( lastDrawnPointIndex > 0 ) {
         lastDrawnPointIndex--;
@@ -1498,9 +1507,9 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     for ( NSUInteger i = indexRange.location; i <= lastDrawnPointIndex; i++ ) {
         CGPoint viewPoint = viewPoints[i];
 
-        if ( isnan(viewPoint.x) || isnan(viewPoint.y) ) {
+        if ( isnan(viewPoint.x) || isnan(viewPoint.y)) {
             if ( !lastPointSkipped ) {
-                if ( !isnan(baselineRadiusValue) ) {
+                if ( !isnan(baselineRadiusValue)) {
                     CGPathMoveToPoint(dataLinePath, NULL, lastPoint.x, lastPoint.y);
                     CGPathAddLineToPoint(dataLinePath, NULL, firstPoint.x, firstPoint.y);
                     CGPathCloseSubpath(dataLinePath);
@@ -1547,7 +1556,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         }
     }
 
-    if ( !lastPointSkipped && !isnan(baselineRadiusValue) ) {
+    if ( !lastPointSkipped && !isnan(baselineRadiusValue)) {
         CGPathMoveToPoint(dataLinePath, NULL, lastPoint.x, lastPoint.y);
         CGPathAddLineToPoint(dataLinePath, NULL, firstPoint.x, firstPoint.y);
         CGPathCloseSubpath(dataLinePath);
@@ -1568,8 +1577,8 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     CPTPolarPlotCurvedInterpolationOption interpolationOption = self.curvedInterpolationOption;
 
     if ( lastDrawnPointIndex > 0 ) {
-        CGPoint *controlPoints1 = calloc( lastDrawnPointIndex, sizeof(CGPoint) );
-        CGPoint *controlPoints2 = calloc( lastDrawnPointIndex, sizeof(CGPoint) );
+        CGPoint *controlPoints1 = calloc(lastDrawnPointIndex, sizeof(CGPoint));
+        CGPoint *controlPoints2 = calloc(lastDrawnPointIndex, sizeof(CGPoint));
 
         lastDrawnPointIndex--;
 
@@ -1577,7 +1586,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         for ( NSUInteger i = indexRange.location; i <= lastDrawnPointIndex; i++ ) {
             CGPoint viewPoint = viewPoints[i];
 
-            if ( isnan(viewPoint.x) || isnan(viewPoint.y) ) {
+            if ( isnan(viewPoint.x) || isnan(viewPoint.y)) {
                 if ( !lastPointSkipped ) {
                     switch ( interpolationOption ) {
                         case CPTPolarPlotCurvedInterpolationNormal:
@@ -1696,9 +1705,9 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         for ( NSUInteger i = indexRange.location; i <= lastDrawnPointIndex; i++ ) {
             CGPoint viewPoint = viewPoints[i];
 
-            if ( isnan(viewPoint.x) || isnan(viewPoint.y) ) {
+            if ( isnan(viewPoint.x) || isnan(viewPoint.y)) {
                 if ( !lastPointSkipped ) {
-                    if ( !isnan(baselineRadiusValue) ) {
+                    if ( !isnan(baselineRadiusValue)) {
                         CGPathMoveToPoint(dataLinePath, NULL, lastPoint.x, lastPoint.y);
                         CGPathAddLineToPoint(dataLinePath, NULL, firstPoint.x, firstPoint.y);
                         CGPathCloseSubpath(dataLinePath);
@@ -1722,13 +1731,13 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                     // add the control points
                     CGPathMoveToPoint(dataLinePath, NULL, cp1.x - CPTFloat(5.0), cp1.y);
                     CGPathAddLineToPoint(dataLinePath, NULL, cp1.x + CPTFloat(5.0), cp1.y);
-                    CGPathMoveToPoint( dataLinePath, NULL, cp1.x, cp1.y - CPTFloat(5.0) );
-                    CGPathAddLineToPoint( dataLinePath, NULL, cp1.x, cp1.y + CPTFloat(5.0) );
+                    CGPathMoveToPoint(dataLinePath, NULL, cp1.x, cp1.y - CPTFloat(5.0));
+                    CGPathAddLineToPoint(dataLinePath, NULL, cp1.x, cp1.y + CPTFloat(5.0));
 
-                    CGPathMoveToPoint( dataLinePath, NULL, cp2.x - CPTFloat(3.5), cp2.y - CPTFloat(3.5) );
-                    CGPathAddLineToPoint( dataLinePath, NULL, cp2.x + CPTFloat(3.5), cp2.y + CPTFloat(3.5) );
-                    CGPathMoveToPoint( dataLinePath, NULL, cp2.x + CPTFloat(3.5), cp2.y - CPTFloat(3.5) );
-                    CGPathAddLineToPoint( dataLinePath, NULL, cp2.x - CPTFloat(3.5), cp2.y + CPTFloat(3.5) );
+                    CGPathMoveToPoint(dataLinePath, NULL, cp2.x - CPTFloat(3.5), cp2.y - CPTFloat(3.5));
+                    CGPathAddLineToPoint(dataLinePath, NULL, cp2.x + CPTFloat(3.5), cp2.y + CPTFloat(3.5));
+                    CGPathMoveToPoint(dataLinePath, NULL, cp2.x + CPTFloat(3.5), cp2.y - CPTFloat(3.5));
+                    CGPathAddLineToPoint(dataLinePath, NULL, cp2.x - CPTFloat(3.5), cp2.y + CPTFloat(3.5));
 
                     // add a line connecting the control points
                     CGPathMoveToPoint(dataLinePath, NULL, cp1.x, cp1.y);
@@ -1743,7 +1752,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             }
         }
 
-        if ( !lastPointSkipped && !isnan(baselineRadiusValue) ) {
+        if ( !lastPointSkipped && !isnan(baselineRadiusValue)) {
             CGPathMoveToPoint(dataLinePath, NULL, lastPoint.x, lastPoint.y);
             CGPathAddLineToPoint(dataLinePath, NULL, firstPoint.x, firstPoint.y);
             CGPathCloseSubpath(dataLinePath);
@@ -1799,12 +1808,12 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             CGFloat d2 = hypot(p2.x - p1.x, p2.y - p1.y);
             CGFloat d3 = hypot(p3.x - p2.x, p3.y - p2.y);
             // constants
-            CGFloat d1_a  = pow(d1, alpha);             // d1^alpha
-            CGFloat d2_a  = pow(d2, alpha);             // d2^alpha
-            CGFloat d3_a  = pow(d3, alpha);             // d3^alpha
-            CGFloat d1_2a = pow( d1_a, CPTFloat(2.0) ); // d1^alpha^2 = d1^2*alpha
-            CGFloat d2_2a = pow( d2_a, CPTFloat(2.0) ); // d2^alpha^2 = d2^2*alpha
-            CGFloat d3_2a = pow( d3_a, CPTFloat(2.0) ); // d3^alpha^2 = d3^2*alpha
+            CGFloat d1_a  = pow(d1, alpha);           // d1^alpha
+            CGFloat d2_a  = pow(d2, alpha);           // d2^alpha
+            CGFloat d3_a  = pow(d3, alpha);           // d3^alpha
+            CGFloat d1_2a = pow(d1_a, CPTFloat(2.0)); // d1^alpha^2 = d1^2*alpha
+            CGFloat d2_2a = pow(d2_a, CPTFloat(2.0)); // d2^alpha^2 = d2^2*alpha
+            CGFloat d3_2a = pow(d3_a, CPTFloat(2.0)); // d3^alpha^2 = d3^2*alpha
 
             // calculate the control points
             // see : http://www.cemyuksel.com/research/catmullrom_param/catmullrom.pdf under point 3.
@@ -1814,9 +1823,9 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             }
             else {
                 CGFloat divisor = CPTFloat(3.0) * d1_a * (d1_a + d2_a);
-                cp1 = CPTPointMake( (p2.x * d1_2a - p0.x * d2_2a + (2 * d1_2a + 3 * d1_a * d2_a + d2_2a) * p1.x) / divisor,
-                                    (p2.y * d1_2a - p0.y * d2_2a + (2 * d1_2a + 3 * d1_a * d2_a + d2_2a) * p1.y) / divisor
-                                     );
+                cp1 = CPTPointMake((p2.x * d1_2a - p0.x * d2_2a + (2 * d1_2a + 3 * d1_a * d2_a + d2_2a) * p1.x) / divisor,
+                                   (p2.y * d1_2a - p0.y * d2_2a + (2 * d1_2a + 3 * d1_a * d2_a + d2_2a) * p1.y) / divisor
+                                  );
             }
 
             if ( fabs(d3) <= epsilon ) {
@@ -1824,8 +1833,8 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             }
             else {
                 CGFloat divisor = 3 * d3_a * (d3_a + d2_a);
-                cp2 = CPTPointMake( (d3_2a * p1.x - d2_2a * p3.x + (2 * d3_2a + 3 * d3_a * d2_a + d2_2a) * p2.x) / divisor,
-                                    (d3_2a * p1.y - d2_2a * p3.y + (2 * d3_2a + 3 * d3_a * d2_a + d2_2a) * p2.y) / divisor );
+                cp2 = CPTPointMake((d3_2a * p1.x - d2_2a * p3.x + (2 * d3_2a + 3 * d3_a * d2_a + d2_2a) * p2.x) / divisor,
+                                   (d3_2a * p1.y - d2_2a * p3.y + (2 * d3_2a + 3 * d3_a * d2_a + d2_2a) * p2.y) / divisor);
             }
 
             points[index + 1]  = cp1;
@@ -1878,17 +1887,17 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                 m.dy = p2.y - p0.y;
 
                 if ( monotonic ) {
-                    if ( m.dx > CPTFloat(0.0) ) {
+                    if ( m.dx > CPTFloat(0.0)) {
                         m.dx = MIN(p2.x - p1.x, p1.x - p0.x);
                     }
-                    else if ( m.dx < CPTFloat(0.0) ) {
+                    else if ( m.dx < CPTFloat(0.0)) {
                         m.dx = MAX(p2.x - p1.x, p1.x - p0.x);
                     }
 
-                    if ( m.dy > CPTFloat(0.0) ) {
+                    if ( m.dy > CPTFloat(0.0)) {
                         m.dy = MIN(p2.y - p1.y, p1.y - p0.y);
                     }
-                    else if ( m.dy < CPTFloat(0.0) ) {
+                    else if ( m.dy < CPTFloat(0.0)) {
                         m.dy = MAX(p2.y - p1.y, p1.y - p0.y);
                     }
                 }
@@ -1998,10 +2007,10 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         NSUInteger n = indexRange.length - 1;
 
         // rhs vector
-        CGPoint *a = malloc( n * sizeof(CGPoint) );
-        CGPoint *b = malloc( n * sizeof(CGPoint) );
-        CGPoint *c = malloc( n * sizeof(CGPoint) );
-        CGPoint *r = malloc( n * sizeof(CGPoint) );
+        CGPoint *a = malloc(n * sizeof(CGPoint));
+        CGPoint *b = malloc(n * sizeof(CGPoint));
+        CGPoint *c = malloc(n * sizeof(CGPoint));
+        CGPoint *r = malloc(n * sizeof(CGPoint));
 
         // left most segment
         a[0] = CGPointZero;
@@ -2048,11 +2057,11 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         cp1[indexRange.location + n] = CGPointMake(r[n - 1].x / b[n - 1].x,
                                                    r[n - 1].y / b[n - 1].y);
         for ( NSUInteger i = n - 2; i > 0; i-- ) {
-            cp1[indexRange.location + i + 1] = CGPointMake( (r[i].x - c[i].x * cp1[indexRange.location + i + 2].x) / b[i].x,
-                                                            (r[i].y - c[i].y * cp1[indexRange.location + i + 2].y) / b[i].y );
+            cp1[indexRange.location + i + 1] = CGPointMake((r[i].x - c[i].x * cp1[indexRange.location + i + 2].x) / b[i].x,
+                                                           (r[i].y - c[i].y * cp1[indexRange.location + i + 2].y) / b[i].y);
         }
-        cp1[indexRange.location + 1] = CGPointMake( (r[0].x - c[0].x * cp1[indexRange.location + 2].x) / b[0].x,
-                                                    (r[0].y - c[0].y * cp1[indexRange.location + 2].y) / b[0].y );
+        cp1[indexRange.location + 1] = CGPointMake((r[0].x - c[0].x * cp1[indexRange.location + 2].x) / b[0].x,
+                                                   (r[0].y - c[0].y * cp1[indexRange.location + 2].y) / b[0].y);
 
         // we have p1, now compute p2
         NSUInteger rangeEnd = NSMaxRange(indexRange) - 1;
@@ -2061,8 +2070,8 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                                  CPTFloat(2.0) * viewPoints[i].y - cp1[i + 1].y);
         }
 
-        cp2[rangeEnd] = CGPointMake( CPTFloat(0.5) * (viewPoints[rangeEnd].x + cp1[rangeEnd].x),
-                                     CPTFloat(0.5) * (viewPoints[rangeEnd].y + cp1[rangeEnd].y) );
+        cp2[rangeEnd] = CGPointMake(CPTFloat(0.5) * (viewPoints[rangeEnd].x + cp1[rangeEnd].x),
+                                    CPTFloat(0.5) * (viewPoints[rangeEnd].y + cp1[rangeEnd].y));
 
         // clean up
         free(a);
@@ -2082,8 +2091,8 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
         if ( theLineStyle ) {
             [theLineStyle setLineStyleInContext:context];
 
-            CGPoint alignedStartPoint = CPTAlignPointToUserSpace( context, CPTPointMake( CGRectGetMinX(rect), CGRectGetMidY(rect) ) );
-            CGPoint alignedEndPoint   = CPTAlignPointToUserSpace( context, CPTPointMake( CGRectGetMaxX(rect), CGRectGetMidY(rect) ) );
+            CGPoint alignedStartPoint = CPTAlignPointToUserSpace(context, CPTPointMake(CGRectGetMinX(rect), CGRectGetMidY(rect)));
+            CGPoint alignedEndPoint   = CPTAlignPointToUserSpace(context, CPTPointMake(CGRectGetMaxX(rect), CGRectGetMidY(rect)));
             CGContextMoveToPoint(context, alignedStartPoint.x, alignedStartPoint.y);
             CGContextAddLineToPoint(context, alignedEndPoint.x, alignedEndPoint.y);
 
@@ -2094,7 +2103,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
         if ( thePlotSymbol ) {
             [thePlotSymbol renderInContext:context
-                                   atPoint:CPTPointMake( CGRectGetMidX(rect), CGRectGetMidY(rect) )
+                                   atPoint:CPTPointMake(CGRectGetMidX(rect), CGRectGetMidY(rect))
                                      scale:self.contentsScale
                              alignToPixels:YES];
         }
@@ -2122,13 +2131,13 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                     CGContextAddPath(context, swatchPath);
                     CGContextClip(context);
 
-                    if ( CPTDecimalGreaterThanOrEqualTo(self.areaBaseValue2.decimalValue, self.areaBaseValue.decimalValue) ) {
-                        [fill1 fillRect:CPTRectMake( CGRectGetMinX(rect), CGRectGetMinY(rect), rect.size.width, rect.size.height / CPTFloat(2.0) ) inContext:context];
-                        [fill2 fillRect:CPTRectMake( CGRectGetMinX(rect), CGRectGetMidY(rect), rect.size.width, rect.size.height / CPTFloat(2.0) ) inContext:context];
+                    if ( CPTDecimalGreaterThanOrEqualTo(self.areaBaseValue2.decimalValue, self.areaBaseValue.decimalValue)) {
+                        [fill1 fillRect:CPTRectMake(CGRectGetMinX(rect), CGRectGetMinY(rect), rect.size.width, rect.size.height / CPTFloat(2.0)) inContext:context];
+                        [fill2 fillRect:CPTRectMake(CGRectGetMinX(rect), CGRectGetMidY(rect), rect.size.width, rect.size.height / CPTFloat(2.0)) inContext:context];
                     }
                     else {
-                        [fill2 fillRect:CPTRectMake( CGRectGetMinX(rect), CGRectGetMinY(rect), rect.size.width, rect.size.height / CPTFloat(2.0) ) inContext:context];
-                        [fill1 fillRect:CPTRectMake( CGRectGetMinX(rect), CGRectGetMidY(rect), rect.size.width, rect.size.height / CPTFloat(2.0) ) inContext:context];
+                        [fill2 fillRect:CPTRectMake(CGRectGetMinX(rect), CGRectGetMinY(rect), rect.size.width, rect.size.height / CPTFloat(2.0)) inContext:context];
+                        [fill1 fillRect:CPTRectMake(CGRectGetMinX(rect), CGRectGetMidY(rect), rect.size.width, rect.size.height / CPTFloat(2.0)) inContext:context];
                     }
 
                     CGContextRestoreGState(context);
@@ -2145,20 +2154,21 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     [self reloadDataIfNeeded];
 
     NSUInteger dataCount = self.cachedDataCount;
+
     if ( dataCount == 0 ) {
         return CGPathCreateMutable();
     }
 
     // Calculate view points
-    CGPoint *viewPoints  = malloc( dataCount * sizeof(CGPoint) );
-    BOOL *drawPointFlags = malloc( dataCount * sizeof(BOOL) );
+    CGPoint *viewPoints  = malloc(dataCount * sizeof(CGPoint));
+    BOOL *drawPointFlags = malloc(dataCount * sizeof(BOOL));
 
     for ( NSUInteger i = 0; i < dataCount; i++ ) {
         drawPointFlags[i] = YES;
     }
 
     [self calculateViewPoints:viewPoints withDrawPointFlags:drawPointFlags numberOfPoints:dataCount];
-    
+
     // Create the path
     CGPathRef dataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:NSMakeRange(0, dataCount) baselineRadiusValue:CPTNAN centrePoint:CGPointZero];
 
@@ -2215,8 +2225,8 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             CGPathRelease(dataLinePath);
 
             CPTNumberArray *lowerLeft  = [space plotPointForPlotAreaViewPoint:boundingBox.origin];
-            CPTNumberArray *upperRight = [space plotPointForPlotAreaViewPoint:CGPointMake( CGRectGetMaxX(boundingBox),
-                                                                                           CGRectGetMaxY(boundingBox) )];
+            CPTNumberArray *upperRight = [space plotPointForPlotAreaViewPoint:CGPointMake(CGRectGetMaxX(boundingBox),
+                                                                                          CGRectGetMaxY(boundingBox))];
 
             switch ( fieldEnum ) {
                 case CPTPolarPlotCoordinatesX:
@@ -2238,7 +2248,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                                                          length:length];
                 }
                 break;
-                    
+
                 case CPTPolarPlotCoordinatesZ:
                 {
                     NSNumber *length = [NSDecimalNumber decimalNumberWithDecimal:
@@ -2247,7 +2257,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
                     range = [CPTPlotRange plotRangeWithLocation:lowerLeft[CPTCoordinateY]
                                                          length:length];
                 }
-                    break;
+                break;
 
                 default:
                     break;
@@ -2282,15 +2292,15 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     switch ( coord ) {
         case CPTCoordinateX:
             result = @[@(CPTPolarPlotFieldRadius)];
-            break;
+        break;
 
         case CPTCoordinateY:
             result = @[@(CPTPolarPlotFieldRadius)];
-            break;
-        
+        break;
+
         case CPTCoordinateZ:
             result = @[@(CPTPolarPlotFieldRadialAngle)];
-            break;
+        break;
 
         default:
             [NSException raise:CPTException format:@"Invalid coordinate passed to fieldIdentifiersForCoordinate:"];
@@ -2328,16 +2338,16 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
 -(void)positionLabelAnnotation:(nonnull CPTPlotSpaceAnnotation *)label forIndex:(NSUInteger)idx
 {
-    NSNumber *thetaValue = [self cachedNumberForField:CPTPolarPlotFieldRadialAngle recordIndex:idx];
+    NSNumber *thetaValue  = [self cachedNumberForField:CPTPolarPlotFieldRadialAngle recordIndex:idx];
     NSNumber *radiusValue = [self cachedNumberForField:CPTPolarPlotFieldRadius recordIndex:idx];
-    
+
     NSNumber *xValue = [NSNumber numberWithDouble:[radiusValue doubleValue] * sin([thetaValue doubleValue])];
     NSNumber *yValue = [NSNumber numberWithDouble:[radiusValue doubleValue] * cos([thetaValue doubleValue])];
 
-    BOOL positiveDirection = YES;
-    CPTPlotRange *minorRange   = [self.plotSpace plotRangeForCoordinate:CPTCoordinateY];
+    BOOL positiveDirection   = YES;
+    CPTPlotRange *minorRange = [self.plotSpace plotRangeForCoordinate:CPTCoordinateY];
 
-    if ( CPTDecimalLessThan( minorRange.lengthDecimal, CPTDecimalFromInteger(0) ) ) {
+    if ( CPTDecimalLessThan(minorRange.lengthDecimal, CPTDecimalFromInteger(0))) {
         positiveDirection = !positiveDirection;
     }
 
@@ -2444,7 +2454,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     }
 
     id<CPTPolarPlotDelegate> theDelegate = (id<CPTPolarPlotDelegate>)self.delegate;
-    BOOL symbolTouchUpHandled              = NO;
+    BOOL symbolTouchUpHandled            = NO;
 
     if ( [theDelegate respondsToSelector:@selector(polarPlot:plotSymbolTouchDownAtRecordIndex:)] ||
          [theDelegate respondsToSelector:@selector(polarPlot:plotSymbolTouchDownAtRecordIndex:withEvent:)] ||
@@ -2468,9 +2478,9 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             CGFloat margin = self.plotSymbolMarginForHitDetection * CPTFloat(2.0);
             symbolRect.size.width  += margin;
             symbolRect.size.height += margin;
-            symbolRect.origin       = CPTPointMake( center.x - CPTFloat(0.5) * CGRectGetWidth(symbolRect), center.y - CPTFloat(0.5) * CGRectGetHeight(symbolRect) );
+            symbolRect.origin       = CPTPointMake(center.x - CPTFloat(0.5) * CGRectGetWidth(symbolRect), center.y - CPTFloat(0.5) * CGRectGetHeight(symbolRect));
 
-            if ( CGRectContainsPoint(symbolRect, plotAreaPoint) ) {
+            if ( CGRectContainsPoint(symbolRect, plotAreaPoint)) {
                 self.pointingDeviceDownIndex = idx;
 
                 if ( [theDelegate respondsToSelector:@selector(polarPlot:plotSymbolTouchDownAtRecordIndex:)] ) {
@@ -2493,7 +2503,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
          ([theDelegate respondsToSelector:@selector(polarPlotDataLineTouchDown:)] ||
           [theDelegate respondsToSelector:@selector(polarPlot:dataLineTouchDownWithEvent:)] ||
           [theDelegate respondsToSelector:@selector(polarPlotDataLineWasSelected:)] ||
-          [theDelegate respondsToSelector:@selector(polarPlot:dataLineWasSelectedWithEvent:)]) ) {
+          [theDelegate respondsToSelector:@selector(polarPlot:dataLineWasSelectedWithEvent:)])) {
         plotSelected = [self plotWasLineHitByInteractionPoint:interactionPoint];
         if ( plotSelected ) {
             // Let the delegate know that the plot was selected.
@@ -2561,7 +2571,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     }
 
     id<CPTPolarPlotDelegate> theDelegate = (id<CPTPolarPlotDelegate>)self.delegate;
-    BOOL symbolSelectHandled               = NO;
+    BOOL symbolSelectHandled             = NO;
 
     if ( [theDelegate respondsToSelector:@selector(polarPlot:plotSymbolTouchUpAtRecordIndex:)] ||
          [theDelegate respondsToSelector:@selector(polarPlot:plotSymbolTouchUpAtRecordIndex:withEvent:)] ||
@@ -2585,9 +2595,9 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
             CGFloat margin = self.plotSymbolMarginForHitDetection * CPTFloat(2.0);
             symbolRect.size.width  += margin;
             symbolRect.size.height += margin;
-            symbolRect.origin       = CPTPointMake( center.x - CPTFloat(0.5) * CGRectGetWidth(symbolRect), center.y - CPTFloat(0.5) * CGRectGetHeight(symbolRect) );
+            symbolRect.origin       = CPTPointMake(center.x - CPTFloat(0.5) * CGRectGetWidth(symbolRect), center.y - CPTFloat(0.5) * CGRectGetHeight(symbolRect));
 
-            if ( CGRectContainsPoint(symbolRect, plotAreaPoint) ) {
+            if ( CGRectContainsPoint(symbolRect, plotAreaPoint)) {
                 self.pointingDeviceDownIndex = idx;
 
                 if ( [theDelegate respondsToSelector:@selector(polarPlot:plotSymbolTouchUpAtRecordIndex:)] ) {
@@ -2622,7 +2632,7 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
          ([theDelegate respondsToSelector:@selector(polarPlotDataLineTouchUp:)] ||
           [theDelegate respondsToSelector:@selector(polarPlot:dataLineTouchUpWithEvent:)] ||
           [theDelegate respondsToSelector:@selector(polarPlotDataLineWasSelected:)] ||
-          [theDelegate respondsToSelector:@selector(polarPlot:dataLineWasSelectedWithEvent:)]) ) {
+          [theDelegate respondsToSelector:@selector(polarPlot:dataLineWasSelectedWithEvent:)])) {
         plotSelected = [self plotWasLineHitByInteractionPoint:interactionPoint];
 
         if ( plotSelected ) {
@@ -2666,31 +2676,31 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
     NSUInteger dataCount     = self.cachedDataCount;
 
     if ( theGraph && thePlotArea && !self.hidden && dataCount ) {
-        CGPoint *viewPoints  = malloc( dataCount * sizeof(CGPoint) );
-        BOOL *drawPointFlags = malloc( dataCount * sizeof(BOOL) );
+        CGPoint *viewPoints  = malloc(dataCount * sizeof(CGPoint));
+        BOOL *drawPointFlags = malloc(dataCount * sizeof(BOOL));
 
         CPTPolarPlotSpace *thePlotSpace = (CPTPolarPlotSpace *)self.plotSpace;
         [self calculatePointsToDraw:drawPointFlags forPlotSpace:thePlotSpace includeVisiblePointsOnly:NO numberOfPoints:dataCount];
         [self calculateViewPoints:viewPoints withDrawPointFlags:drawPointFlags numberOfPoints:dataCount];
         NSInteger firstDrawnPointIndex = [self extremeDrawnPointIndexForFlags:drawPointFlags numberOfPoints:dataCount extremeNumIsLowerBound:YES];
-        
+
         NSDecimal centrePlotPoint[2];
         centrePlotPoint[CPTPolarPlotCoordinatesX] = [[NSDecimalNumber numberWithDouble:0.0] decimalValue];
         centrePlotPoint[CPTPolarPlotCoordinatesY] = [[NSDecimalNumber numberWithDouble:0.0] decimalValue];
-        
+
         CGPoint centrePoint = [self convertPoint:[(CPTPolarPlotSpace *)self.plotSpace plotAreaViewPointForPlotPoint:centrePlotPoint numberOfCoordinates:2] fromLayer:self.plotArea];
 
         if ( firstDrawnPointIndex != NSNotFound ) {
             NSInteger lastDrawnPointIndex = [self extremeDrawnPointIndexForFlags:drawPointFlags numberOfPoints:dataCount extremeNumIsLowerBound:NO];
 
-            NSRange viewIndemajorRange = NSMakeRange( (NSUInteger)firstDrawnPointIndex, (NSUInteger)(lastDrawnPointIndex - firstDrawnPointIndex + 1) );
-            CGPathRef dataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:viewIndemajorRange baselineRadiusValue:CPTNAN centrePoint:centrePoint];
-            CGPathRef path         = CGPathCreateCopyByStrokingPath( dataLinePath,
-                                                                     NULL,
-                                                                     self.plotLineMarginForHitDetection * CPTFloat(2.0),
-                                                                     kCGLineCapRound,
-                                                                     kCGLineJoinRound,
-                                                                     CPTFloat(3.0) );
+            NSRange viewIndemajorRange = NSMakeRange((NSUInteger)firstDrawnPointIndex, (NSUInteger)(lastDrawnPointIndex - firstDrawnPointIndex + 1));
+            CGPathRef dataLinePath     = [self newDataLinePathForViewPoints:viewPoints indexRange:viewIndemajorRange baselineRadiusValue:CPTNAN centrePoint:centrePoint];
+            CGPathRef path             = CGPathCreateCopyByStrokingPath(dataLinePath,
+                                                                        NULL,
+                                                                        self.plotLineMarginForHitDetection * CPTFloat(2.0),
+                                                                        kCGLineCapRound,
+                                                                        kCGLineJoinRound,
+                                                                        CPTFloat(3.0));
 
             CGPoint plotAreaPoint = [theGraph convertPoint:interactionPoint toLayer:thePlotArea];
 
@@ -2739,10 +2749,10 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
 -(void)setCurvedInterpolationCustomAlpha:(CGFloat)newCurvedInterpolationCustomAlpha
 {
-    if ( newCurvedInterpolationCustomAlpha > CPTFloat(1.0) ) {
+    if ( newCurvedInterpolationCustomAlpha > CPTFloat(1.0)) {
         newCurvedInterpolationCustomAlpha = CPTFloat(1.0);
     }
-    if ( newCurvedInterpolationCustomAlpha < CPTFloat(0.0) ) {
+    if ( newCurvedInterpolationCustomAlpha < CPTFloat(0.0)) {
         newCurvedInterpolationCustomAlpha = CPTFloat(0.0);
     }
 
@@ -2827,29 +2837,31 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
 -(void)setThetaValues:(nullable CPTNumberArray *)newValues
 {
-    if(((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)
-    {
+    if (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees ) {
         CPTMutableNumberArray *adjustedValues = [CPTMutableNumberArray arrayWithCapacity:[newValues count]];
-        for(NSNumber *theta in newValues)
-            [adjustedValues addObject:[NSNumber numberWithDouble:[theta doubleValue]/180.0*M_PI]];
+        for ( NSNumber *theta in newValues ) {
+            [adjustedValues addObject:[NSNumber numberWithDouble:[theta doubleValue] / 180.0 * M_PI]];
+        }
         [self cacheNumbers:adjustedValues forField:CPTPolarPlotFieldRadialAngle];
     }
-    else
+    else {
         [self cacheNumbers:newValues forField:CPTPolarPlotFieldRadialAngle];
+    }
 }
 
 -(nullable CPTNumberArray *)thetaValues
 {
-    if(((CPTPolarPlotSpace*)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees)
-    {
-        CPTNumberArray *values = [[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle] sampleArray];
+    if (((CPTPolarPlotSpace *)self.plotSpace).radialAngleOption == CPTPolarRadialAngleModeDegrees ) {
+        CPTNumberArray *values                = [[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle] sampleArray];
         CPTMutableNumberArray *adjustedValues = [CPTMutableNumberArray arrayWithCapacity:[values count]];
-        for(NSNumber *theta in values)
-            [adjustedValues addObject:[NSNumber numberWithDouble:[theta doubleValue]*180.0/M_PI]];
+        for ( NSNumber *theta in values ) {
+            [adjustedValues addObject:[NSNumber numberWithDouble:[theta doubleValue] * 180.0 / M_PI]];
+        }
         return [CPTNumberArray arrayWithArray:adjustedValues];
     }
-    else
+    else {
         return [[self cachedNumbersForField:CPTPolarPlotFieldRadialAngle] sampleArray];
+    }
 }
 
 -(void)setRadiusValues:(nullable CPTNumberArray *)newValues
@@ -2875,95 +2887,95 @@ NSString *const CPTPolarPlotBindingPlotSymbols = @"plotSymbols"; ///< Plot symbo
 
 /// @endcond
 
-- (CGFloat) Calc_ATAN_XY: (CGFloat) x y: (CGFloat) y
+-(CGFloat)Calc_ATAN_XY:(CGFloat)x y:(CGFloat)y
 {
-    CGFloat Angle = fabs(atan(x/y));
-    if(x < (CGFloat)0.0)
-    {
-        if(y < 0)
+    CGFloat Angle = fabs(atan(x / y));
+
+    if ( x < (CGFloat)0.0 ) {
+        if ( y < 0 ) {
             Angle += (CGFloat)M_PI;
-        else
+        }
+        else {
             Angle = (CGFloat)(2.0 * M_PI) - Angle;
+        }
     }
-    else
-    {
-        if(y < (CGFloat)0.0)
+    else {
+        if ( y < (CGFloat)0.0 ) {
             Angle = (CGFloat)M_PI - Angle;
+        }
     }
     return Angle;
 }
 
-
 @end
-
 
 // need create 2 radial lines along the theta angle at the band limits
 // and the datePathLine between those points
-//                            NSRange partialIndexmajorRange = NSMakeRange(0, 0);
-//                            NSUInteger j = 0;
-//                            double lowerLimit = bandRange.minLimitDouble, upperLimit = bandRange.maxLimitDouble;
-//                            for(NSNumber *num in [thetaValueData sampleArray])
-//                            {
-//                                if([num doubleValue] > lowerLimit)
-//                                    break;
-//                                j++;
-//                            }
-//                            if(j > 0)
-//                                partialIndexmajorRange.location = j-1;
-//                            j = [[thetaValueData sampleArray] count];
-//                            for(NSNumber *num in [[[[thetaValueData sampleArray] reverseObjectEnumerator] allObjects] mutableCopy])
-//                            {
-//                                if([num doubleValue] < upperLimit)
-//                                    break;
-//                                j--;
-//                            }
-//                            partialIndexmajorRange.length = j - partialIndexmajorRange.location;
-//                            CGPathRef partialDataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:partialIndexmajorRange baselineRadiusValue:CPTNAN centrePoint:centrePoint];
+// NSRange partialIndexmajorRange = NSMakeRange(0, 0);
+// NSUInteger j = 0;
+// double lowerLimit = bandRange.minLimitDouble, upperLimit = bandRange.maxLimitDouble;
+// for(NSNumber *num in [thetaValueData sampleArray])
+// {
+// if([num doubleValue] > lowerLimit)
+// break;
+// j++;
+// }
+// if(j > 0)
+// partialIndexmajorRange.location = j-1;
+// j = [[thetaValueData sampleArray] count];
+// for(NSNumber *num in [[[[thetaValueData sampleArray] reverseObjectEnumerator] allObjects] mutableCopy])
+// {
+// if([num doubleValue] < upperLimit)
+// break;
+// j--;
+// }
+// partialIndexmajorRange.length = j - partialIndexmajorRange.location;
+// CGPathRef partialDataLinePath = [self newDataLinePathForViewPoints:viewPoints indexRange:partialIndexmajorRange baselineRadiusValue:CPTNAN centrePoint:centrePoint];
 
-//                            CGPoint lowerBandOuterPoint = [self translatedPolarCoordinatesToContextCoordinatesWithFromTheta:bandRange.minLimitDecimal Radius:[[NSNumber numberWithDouble:maxLength] decimalValue]];
-//                            if ( pixelAlign ) {
-//                                lowerBandOuterPoint = CPTAlignIntegralPointToUserSpace(context, lowerBandOuterPoint);
-//                            }
+// CGPoint lowerBandOuterPoint = [self translatedPolarCoordinatesToContextCoordinatesWithFromTheta:bandRange.minLimitDecimal Radius:[[NSNumber numberWithDouble:maxLength] decimalValue]];
+// if ( pixelAlign ) {
+// lowerBandOuterPoint = CPTAlignIntegralPointToUserSpace(context, lowerBandOuterPoint);
+// }
 //
-//                            CGMutablePathRef lowerBandLinePath = CGPathCreateMutable();
-//                            CGPathMoveToPoint(lowerBandLinePath, NULL, centrePoint.x, centrePoint.y);
-//                            CGPathAddLineToPoint(lowerBandLinePath, NULL, lowerBandOuterPoint.x, lowerBandOuterPoint.y);
+// CGMutablePathRef lowerBandLinePath = CGPathCreateMutable();
+// CGPathMoveToPoint(lowerBandLinePath, NULL, centrePoint.x, centrePoint.y);
+// CGPathAddLineToPoint(lowerBandLinePath, NULL, lowerBandOuterPoint.x, lowerBandOuterPoint.y);
 //
-//                            CGPoint lowerIntersectionPoint = [self calculatedIntersectionOfTwoPaths:partialDataLinePath Second:lowerBandLinePath];
+// CGPoint lowerIntersectionPoint = [self calculatedIntersectionOfTwoPaths:partialDataLinePath Second:lowerBandLinePath];
 //
-//                            CGPoint upperBandOuterPoint = [self translatedPolarCoordinatesToContextCoordinatesWithFromTheta:bandRange.maxLimitDecimal Radius:[[NSNumber numberWithDouble:maxLength] decimalValue]];
-//                            if ( pixelAlign ) {
-//                                upperBandOuterPoint = CPTAlignIntegralPointToUserSpace(context, upperBandOuterPoint);
-//                            }
+// CGPoint upperBandOuterPoint = [self translatedPolarCoordinatesToContextCoordinatesWithFromTheta:bandRange.maxLimitDecimal Radius:[[NSNumber numberWithDouble:maxLength] decimalValue]];
+// if ( pixelAlign ) {
+// upperBandOuterPoint = CPTAlignIntegralPointToUserSpace(context, upperBandOuterPoint);
+// }
 //
-//                            CGMutablePathRef upperBandLinePath = CGPathCreateMutable();
-//                            CGPathMoveToPoint(upperBandLinePath, NULL, centrePoint.x, centrePoint.y);
-//                            CGPathAddLineToPoint(upperBandLinePath, NULL, upperBandOuterPoint.x, upperBandOuterPoint.y);
+// CGMutablePathRef upperBandLinePath = CGPathCreateMutable();
+// CGPathMoveToPoint(upperBandLinePath, NULL, centrePoint.x, centrePoint.y);
+// CGPathAddLineToPoint(upperBandLinePath, NULL, upperBandOuterPoint.x, upperBandOuterPoint.y);
 //
-//                            CGPoint upperIntersectionPoint = [self calculatedIntersectionOfTwoPaths:partialDataLinePath Second:upperBandLinePath];
+// CGPoint upperIntersectionPoint = [self calculatedIntersectionOfTwoPaths:partialDataLinePath Second:upperBandLinePath];
 //
-//                            CGMutablePathRef clippedBandAreaPath = CGPathCreateMutableCopy(partialDataLinePath);
-//                            CGPathAddLineToPoint(clippedBandAreaPath, NULL, upperIntersectionPoint.x, upperIntersectionPoint.y);
-//                            CGPathAddLineToPoint(clippedBandAreaPath, NULL, centrePoint.x, centrePoint.y);
-//                            CGPathAddLineToPoint(clippedBandAreaPath, NULL, lowerIntersectionPoint.x, lowerIntersectionPoint.y);
-//                            CGPathCloseSubpath(clippedBandAreaPath);
+// CGMutablePathRef clippedBandAreaPath = CGPathCreateMutableCopy(partialDataLinePath);
+// CGPathAddLineToPoint(clippedBandAreaPath, NULL, upperIntersectionPoint.x, upperIntersectionPoint.y);
+// CGPathAddLineToPoint(clippedBandAreaPath, NULL, centrePoint.x, centrePoint.y);
+// CGPathAddLineToPoint(clippedBandAreaPath, NULL, lowerIntersectionPoint.x, lowerIntersectionPoint.y);
+// CGPathCloseSubpath(clippedBandAreaPath);
 
-//- (CGPoint)calculatedIntersectionOfTwoPaths:(CGMutablePathRef)firstPath Second:(CGMutablePathRef)secondPath
-//{
-//    CGPoint intersectionPoint = CGPointZero;
-//    ANPathBitmap * bm1 = [[ANPathBitmap alloc] initWithPath:firstPath];
-//    ANPathBitmap * bm2 = [[ANPathBitmap alloc] initWithPath:secondPath];
-//    bm1.lineCap = kCGLineCapRound;
-//    bm2.lineCap = kCGLineCapRound;
-//    bm1.lineThickness = 4;
-//    bm2.lineThickness = 4;
-//    [bm1 generateBitmap];
-//    [bm2 generateBitmap];
-//    ANPathIntersection * intersection = [[ANPathIntersection alloc] initWithPathBitmap:bm1 anotherPath:bm2];
-//    if ([intersection pathLinesIntersect:&intersectionPoint]) {
-//        NSLog(@"Intersection x:%0.2f y:%0.2f", intersectionPoint.x, intersectionPoint.y);
-//    } else {
-//        NSLog(@"No Intersection");
-//    }
-//    return intersectionPoint;
-//}
+// - (CGPoint)calculatedIntersectionOfTwoPaths:(CGMutablePathRef)firstPath Second:(CGMutablePathRef)secondPath
+// {
+// CGPoint intersectionPoint = CGPointZero;
+// ANPathBitmap * bm1 = [[ANPathBitmap alloc] initWithPath:firstPath];
+// ANPathBitmap * bm2 = [[ANPathBitmap alloc] initWithPath:secondPath];
+// bm1.lineCap = kCGLineCapRound;
+// bm2.lineCap = kCGLineCapRound;
+// bm1.lineThickness = 4;
+// bm2.lineThickness = 4;
+// [bm1 generateBitmap];
+// [bm2 generateBitmap];
+// ANPathIntersection * intersection = [[ANPathIntersection alloc] initWithPathBitmap:bm1 anotherPath:bm2];
+// if ([intersection pathLinesIntersect:&intersectionPoint]) {
+// NSLog(@"Intersection x:%0.2f y:%0.2f", intersectionPoint.x, intersectionPoint.y);
+// } else {
+// NSLog(@"No Intersection");
+// }
+// return intersectionPoint;
+// }

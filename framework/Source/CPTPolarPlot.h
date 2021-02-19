@@ -1,9 +1,9 @@
 #import "CPTDefinitions.h"
+#import "CPTDefinitions.h"
 #import "CPTLimitBand.h"
+#import "CPTNumericDataType.h"
 #import "CPTPlot.h"
 #import "CPTPlotSymbol.h"
-#import "CPTDefinitions.h"
-#import "CPTNumericDataType.h"
 
 /// @file
 
@@ -18,14 +18,12 @@ extern NSString *__nonnull const CPTPolarPlotBindingRadiusValues;
 extern NSString *__nonnull const CPTPolarPlotBindingPlotSymbols;
 /// @}
 
-
-
 /**
  *  @brief Enumeration of polar plot data source field types
  **/
 typedef NS_ENUM (NSInteger, CPTPolarPlotField) {
     CPTPolarPlotFieldRadialAngle, ///< RadialAngle values.
-    CPTPolarPlotFieldRadius  ///< Radius values.
+    CPTPolarPlotFieldRadius       ///< Radius values.
 };
 
 /**
@@ -33,10 +31,9 @@ typedef NS_ENUM (NSInteger, CPTPolarPlotField) {
  **/
 typedef NS_ENUM (NSInteger, CPTPolarPlotCoordinates) {
     CPTPolarPlotCoordinatesX, ///< X values.
-    CPTPolarPlotCoordinatesY,  ///< Y values.
+    CPTPolarPlotCoordinatesY, ///< Y values.
     CPTPolarPlotCoordinatesZ  ///< Z values (theta values).
 };
-
 
 /**
  *  @brief Enumeration of polar plot interpolation algorithms

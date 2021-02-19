@@ -7,10 +7,10 @@
 #import "CPTMutableLineStyle.h"
 #import "CPTMutableTextStyle.h"
 #import "CPTPlotAreaFrame.h"
-#import "CPTUtilities.h"
 #import "CPTPolarAxis.h"
 #import "CPTPolarAxisSet.h"
 #import "CPTPolarGraph.h"
+#import "CPTUtilities.h"
 
 CPTThemeName const kCPTStocksTheme_Polar = @"Stocks Polar";
 
@@ -53,6 +53,7 @@ CPTThemeName const kCPTStocksTheme_Polar = @"Stocks Polar";
     plotAreaFrame.fill             = [CPTFill fillWithGradient:stocksBackgroundGradient];
 
     CPTMutableLineStyle *borderLineStyle = [CPTMutableLineStyle lineStyle];
+
     borderLineStyle.lineColor = [CPTColor colorWithGenericGray:CPTFloat(0.2)];
     borderLineStyle.lineWidth = CPTFloat(0.0);
 
@@ -62,7 +63,6 @@ CPTThemeName const kCPTStocksTheme_Polar = @"Stocks Polar";
 
 -(void)applyThemeToAxisSet:(nonnull CPTAxisSet *)axisSet
 {
-    
     CPTMutableLineStyle *majorLineStyle = [CPTMutableLineStyle lineStyle];
 
     majorLineStyle.lineCap   = kCGLineCapRound;
@@ -70,22 +70,26 @@ CPTThemeName const kCPTStocksTheme_Polar = @"Stocks Polar";
     majorLineStyle.lineWidth = CPTFloat(3.0);
 
     CPTMutableLineStyle *minorLineStyle = [CPTMutableLineStyle lineStyle];
+
     minorLineStyle.lineColor = [CPTColor whiteColor];
     minorLineStyle.lineWidth = CPTFloat(3.0);
 
     CPTMutableTextStyle *whiteTextStyle = [[CPTMutableTextStyle alloc] init];
+
     whiteTextStyle.color    = [CPTColor whiteColor];
     whiteTextStyle.fontSize = CPTFloat(14.0);
 
     CPTMutableTextStyle *minorTickWhiteTextStyle = [[CPTMutableTextStyle alloc] init];
+
     minorTickWhiteTextStyle.color    = [CPTColor whiteColor];
     minorTickWhiteTextStyle.fontSize = CPTFloat(12.0);
 
     // added S.Wainwright
-    
-    CPTPolarAxisSet *polarAxisSet  = (CPTPolarAxisSet *)axisSet;
-    
-    CPTPolarAxis *major           = polarAxisSet.majorAxis;
+
+    CPTPolarAxisSet *polarAxisSet = (CPTPolarAxisSet *)axisSet;
+
+    CPTPolarAxis *major = polarAxisSet.majorAxis;
+
     major.labelingPolicy          = CPTAxisLabelingPolicyFixedInterval;
     major.majorIntervalLength     = @0.5;
     major.tickDirection           = CPTSignNone;
@@ -98,8 +102,9 @@ CPTThemeName const kCPTStocksTheme_Polar = @"Stocks Polar";
     major.labelTextStyle          = whiteTextStyle;
     major.minorTickLabelTextStyle = minorTickWhiteTextStyle;
     major.titleTextStyle          = whiteTextStyle;
-    
-    CPTPolarAxis *minor           = polarAxisSet.majorAxis;
+
+    CPTPolarAxis *minor = polarAxisSet.majorAxis;
+
     minor.labelingPolicy          = CPTAxisLabelingPolicyFixedInterval;
     minor.majorIntervalLength     = @0.5;
     minor.minorTicksPerInterval   = 4;
@@ -112,14 +117,15 @@ CPTThemeName const kCPTStocksTheme_Polar = @"Stocks Polar";
     minor.labelTextStyle          = whiteTextStyle;
     minor.minorTickLabelTextStyle = minorTickWhiteTextStyle;
     minor.titleTextStyle          = whiteTextStyle;
-    
-    CPTPolarAxis *radial          = polarAxisSet.radialAxis;
-    radial.labelingPolicy          = CPTAxisLabelingPolicyFixedInterval;
-    radial.majorIntervalLength     = @(M_PI/6.0);
-    radial.tickDirection           = CPTSignNone;
-    radial.minorTicksPerInterval   = 2;
-    radial.majorTickLineStyle      = majorLineStyle;
-    radial.minorTickLineStyle      = minorLineStyle;
+
+    CPTPolarAxis *radial = polarAxisSet.radialAxis;
+
+    radial.labelingPolicy        = CPTAxisLabelingPolicyFixedInterval;
+    radial.majorIntervalLength   = @(M_PI / 6.0);
+    radial.tickDirection         = CPTSignNone;
+    radial.minorTicksPerInterval = 2;
+    radial.majorTickLineStyle    = majorLineStyle;
+    radial.minorTickLineStyle    = minorLineStyle;
 }
 
 #pragma mark -

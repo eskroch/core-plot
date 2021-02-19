@@ -1,17 +1,17 @@
 #import "CPTFieldFunctionDataSource.h"
 
+#import "CPTContourPlot.h"
 #import "CPTExceptions.h"
 #import "CPTMutablePlotRange.h"
 #import "CPTNumericData.h"
-#import "CPTVectorFieldPlot.h"
-#import "CPTContourPlot.h"
 #import "CPTUtilities.h"
+#import "CPTVectorFieldPlot.h"
 #import "CPTXYPlotSpace.h"
 #import "tgmath.h"
 
 /// @cond
 
-static void *CPTFieldFunctionDataSourceKVOContext = (void *)&CPTFieldFunctionDataSourceKVOContext;
+static void *CPTFieldFunctionDataSourceKVOContext   = (void *)&CPTFieldFunctionDataSourceKVOContext;
 static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctionDataSourceKVOContext;
 
 @interface CPTFieldFunctionDataSource()
@@ -129,7 +129,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
     NSParameterAssert(blockX);
     NSParameterAssert(blockY);
 
-    if ( (self = [self initForPlot:plot]) ) {
+    if ((self = [self initForPlot:plot])) {
         dataSourceBlockX = blockX;
         dataSourceBlockY = blockY;
 
@@ -147,7 +147,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 {
     NSParameterAssert(block);
 
-    if ( (self = [self initForPlot:plot]) ) {
+    if ((self = [self initForPlot:plot])) {
         dataSourceBlock = block;
 
         plot.dataSource = self;
@@ -160,23 +160,23 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 -(nonnull instancetype)initForPlot:(nonnull CPTPlot *)plot
 {
     NSParameterAssert([plot isKindOfClass:[CPTVectorFieldPlot class]] || [plot isKindOfClass:[CPTContourPlot class]]);
-   
-    if ( (self = [super init]) ) {
-        dataPlot           = plot;
-        dataSourceBlockX    = nil;
-        dataSourceBlockY    = nil;
-        resolutionX         = CPTFloat(1.0);
-        resolutionY         = CPTFloat(1.0);
-        cachedXStep         = 0.0;
-        dataXCount         = 0;
-        cachedXCount        = 0;
-        cachedPlotXRange    = nil;
-        dataXRange          = nil;
-        cachedYStep         = 0.0;
-        dataYCount         = 0;
-        cachedYCount        = 0;
-        cachedPlotYRange    = nil;
-        dataYRange          = nil;
+
+    if ((self = [super init])) {
+        dataPlot         = plot;
+        dataSourceBlockX = nil;
+        dataSourceBlockY = nil;
+        resolutionX      = CPTFloat(1.0);
+        resolutionY      = CPTFloat(1.0);
+        cachedXStep      = 0.0;
+        dataXCount       = 0;
+        cachedXCount     = 0;
+        cachedPlotXRange = nil;
+        dataXRange       = nil;
+        cachedYStep      = 0.0;
+        dataYCount       = 0;
+        cachedYCount     = 0;
+        cachedPlotYRange = nil;
+        dataYRange       = nil;
 
         plot.cachePrecision = CPTPlotCachePrecisionDouble;
 
@@ -184,17 +184,17 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
                                                  selector:@selector(plotBoundsChanged)
                                                      name:CPTLayerBoundsDidChangeNotification
                                                    object:plot];
-        if ([plot isKindOfClass:[CPTVectorFieldPlot class]]) {
+        if ( [plot isKindOfClass:[CPTVectorFieldPlot class]] ) {
             [plot addObserver:self
-               forKeyPath:@"plotSpace"
-                  options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld | NSKeyValueObservingOptionInitial
-                  context:CPTFieldFunctionDataSourceKVOContext];
+                   forKeyPath:@"plotSpace"
+                      options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld | NSKeyValueObservingOptionInitial
+                      context:CPTFieldFunctionDataSourceKVOContext];
         }
         else {
             [plot addObserver:self
-               forKeyPath:@"plotSpace"
-                  options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld | NSKeyValueObservingOptionInitial
-                  context:CPTContourFunctionDataSourceKVOContext];
+                   forKeyPath:@"plotSpace"
+                      options:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld | NSKeyValueObservingOptionInitial
+                      context:CPTContourFunctionDataSourceKVOContext];
         }
     }
     return self;
@@ -204,26 +204,26 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 -(nonnull instancetype)init
 {
     [NSException raise:CPTException format:@"%@ must be initialized with a function or a block.", NSStringFromClass([self class])];
-    return [self initForPlot:[CPTVectorFieldPlot layer] withBlockX:^(double x, double y) {
+    return [self initForPlot:[CPTVectorFieldPlot layer] withBlockX: ^(double x, double y) {
         return sin(x) * cos(y);
-    } withBlockY:^(double x, double y) {
+    } withBlockY: ^(double x, double y) {
         return cos(x) * sin(y);
     }];
-    
-//    [NSException raise:CPTException format:@"%@ must be initialized with a function or a block.", NSStringFromClass([self class])];
-//    return [self initForPlot:[CPTContourPlot layer] withBlock:^(double x, double y) {
-//        return sin(x) * sin(y);
-//    }];
+
+// [NSException raise:CPTException format:@"%@ must be initialized with a function or a block.", NSStringFromClass([self class])];
+// return [self initForPlot:[CPTContourPlot layer] withBlock:^(double x, double y) {
+// return sin(x) * sin(y);
+// }];
 }
 
 -(void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 
-    if ([dataPlot isKindOfClass:[CPTVectorFieldPlot class]]) {
+    if ( [dataPlot isKindOfClass:[CPTVectorFieldPlot class]] ) {
         [dataPlot removeObserver:self forKeyPath:@"plotSpace" context:CPTFieldFunctionDataSourceKVOContext];
     }
-    else if ([dataPlot isKindOfClass:[CPTContourPlot class]]) {
+    else if ( [dataPlot isKindOfClass:[CPTContourPlot class]] ) {
         [dataPlot removeObserver:self forKeyPath:@"plotSpace" context:CPTContourFunctionDataSourceKVOContext];
     }
 }
@@ -237,25 +237,25 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 
 -(void)setResolutionX:(CGFloat)newResolution
 {
-    NSParameterAssert(newResolution > CPTFloat(0.0) );
+    NSParameterAssert(newResolution > CPTFloat(0.0));
 
     if ( newResolution != resolutionX ) {
         resolutionX = newResolution;
 
         self.cachedXCount     = 0;
         self.cachedPlotXRange = nil;
-        
+
         [self plotBoundsChanged];
     }
 }
 
 -(void)setResolutionY:(CGFloat)newResolution
 {
-    NSParameterAssert(newResolution > CPTFloat(0.0) );
+    NSParameterAssert(newResolution > CPTFloat(0.0));
 
     if ( newResolution != resolutionY ) {
         resolutionY = newResolution;
-        
+
         self.cachedYCount     = 0;
         self.cachedPlotYRange = nil;
 
@@ -291,7 +291,6 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
     }
 }
 
-
 /// @endcond
 
 #pragma mark -
@@ -311,10 +310,10 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 
         if ( plotSpace ) {
             BOOL needsReloading = FALSE;
-            
+
             CGFloat width = plot.bounds.size.width;
-            if ( width > CPTFloat(0.0) ) {
-                NSUInteger count = (NSUInteger)lrint(ceil(width / self.resolutionX) ) + 1;
+            if ( width > CPTFloat(0.0)) {
+                NSUInteger count = (NSUInteger)lrint(ceil(width / self.resolutionX)) + 1;
 
                 if ( count > self.cachedXCount ) {
                     self.dataXCount   = count;
@@ -331,8 +330,8 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
                 self.cachedXStep  = 0.0;
             }
             CGFloat height = plot.bounds.size.height;
-            if ( height > CPTFloat(0.0) ) {
-                NSUInteger count = (NSUInteger)lrint(ceil(height / self.resolutionY) ) + 1;
+            if ( height > CPTFloat(0.0)) {
+                NSUInteger count = (NSUInteger)lrint(ceil(height / self.resolutionY)) + 1;
 
                 if ( count > self.cachedYCount ) {
                     self.dataYCount   = count;
@@ -362,7 +361,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 {
     CPTPlot *plot = self.dataPlot;
 
-    CPTXYPlotSpace *plotSpace      = (CPTXYPlotSpace *)plot.plotSpace;
+    CPTXYPlotSpace *plotSpace       = (CPTXYPlotSpace *)plot.plotSpace;
     CPTMutablePlotRange *plotXRange = [plotSpace.xRange mutableCopy];
     CPTMutablePlotRange *plotYRange = [plotSpace.yRange mutableCopy];
 
@@ -375,16 +374,16 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
     double stepX = self.cachedXStep;
     double stepY = self.cachedYStep;
 
-    if ( [cachedXRange containsRange:plotXRange] && [cachedYRange containsRange:plotYRange]) {
+    if ( [cachedXRange containsRange:plotXRange] && [cachedYRange containsRange:plotYRange] ) {
         // no new data needed
     }
-    else if ( ![cachedXRange intersectsRange:plotXRange] || (stepX == 0.0) || plotXRange.maxLimitDouble > cachedXRange.maxLimitDouble || plotXRange.minLimitDouble < cachedXRange.minLimitDouble )  {
+    else if ( ![cachedXRange intersectsRange:plotXRange] || (stepX == 0.0) || (plotXRange.maxLimitDouble > cachedXRange.maxLimitDouble) || (plotXRange.minLimitDouble < cachedXRange.minLimitDouble)) {
         self.cachedXCount     = 0;
         self.cachedPlotXRange = plotXRange;
 
         [self plotBoundsChanged];
     }
-    else if ( ![cachedYRange intersectsRange:plotYRange] || (stepY == 0.0) || plotYRange.maxLimitDouble > cachedYRange.maxLimitDouble || plotYRange.minLimitDouble < cachedYRange.minLimitDouble ) {
+    else if ( ![cachedYRange intersectsRange:plotYRange] || (stepY == 0.0) || (plotYRange.maxLimitDouble > cachedYRange.maxLimitDouble) || (plotYRange.minLimitDouble < cachedYRange.minLimitDouble)) {
         self.cachedYCount     = 0;
         self.cachedPlotYRange = plotYRange;
 
@@ -394,16 +393,16 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
         if ( stepY > 0.0 ) {
             double minLimit = plotYRange.minLimitDouble;
             if ( ![cachedYRange containsDouble:minLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint( (ceil( (cachedYRange.minLimitDouble - minLimit) / stepY ) ) );
+                NSUInteger numPoints = (NSUInteger)lrint((ceil((cachedYRange.minLimitDouble - minLimit) / stepY)));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepY * numPoints);
                 cachedYRange.locationDecimal = CPTDecimalSubtract(cachedYRange.locationDecimal, offset);
-                
+
                 [plot replaceRowDataShiftDown:YES numberOfRecords:numPoints columnCount:self.dataXCount rowCount:self.dataYCount];
             }
             double maxLimit = plotYRange.maxLimitDouble;
             if ( ![cachedYRange containsDouble:maxLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint(ceil( (maxLimit - cachedYRange.maxLimitDouble) / stepY ) );
+                NSUInteger numPoints = (NSUInteger)lrint(ceil((maxLimit - cachedYRange.maxLimitDouble) / stepY));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepY * numPoints);
                 cachedYRange.locationDecimal = CPTDecimalAdd(cachedYRange.locationDecimal, offset);
@@ -414,7 +413,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
         else {
             double maxLimit = plotYRange.maxLimitDouble;
             if ( ![cachedYRange containsDouble:maxLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint(ceil( (cachedYRange.maxLimitDouble - maxLimit) / stepY ) );
+                NSUInteger numPoints = (NSUInteger)lrint(ceil((cachedYRange.maxLimitDouble - maxLimit) / stepY));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepY * numPoints);
                 cachedYRange.locationDecimal = CPTDecimalSubtract(cachedYRange.locationDecimal, offset);
@@ -423,7 +422,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
             }
             double minLimit = plotYRange.minLimitDouble;
             if ( ![cachedYRange containsDouble:minLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint(ceil( (minLimit - cachedYRange.minLimitDouble) / stepY ) );
+                NSUInteger numPoints = (NSUInteger)lrint(ceil((minLimit - cachedYRange.minLimitDouble) / stepY));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepY * numPoints);
                 cachedYRange.locationDecimal = CPTDecimalAdd(cachedYRange.locationDecimal, offset);
@@ -431,20 +430,20 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
                 [plot replaceRowDataShiftDown:YES numberOfRecords:numPoints columnCount:self.dataXCount rowCount:self.dataYCount];
             }
         }
-        
+
         if ( stepX > 0.0 ) {
             double minLimit = plotXRange.minLimitDouble;
             if ( ![cachedXRange containsDouble:minLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint( (ceil( (cachedXRange.minLimitDouble - minLimit) / stepX ) ) );
+                NSUInteger numPoints = (NSUInteger)lrint((ceil((cachedXRange.minLimitDouble - minLimit) / stepX)));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepX * numPoints);
                 cachedXRange.locationDecimal = CPTDecimalSubtract(cachedXRange.locationDecimal, offset);
-                
+
                 [plot replaceColumnDataShiftLeft:YES numberOfRecords:numPoints columnCount:self.dataXCount rowCount:self.dataYCount];
             }
             double maxLimit = plotXRange.maxLimitDouble;
             if ( ![cachedXRange containsDouble:maxLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint(ceil( (maxLimit - cachedXRange.maxLimitDouble) / stepX ) );
+                NSUInteger numPoints = (NSUInteger)lrint(ceil((maxLimit - cachedXRange.maxLimitDouble) / stepX));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepX * numPoints);
                 cachedXRange.locationDecimal = CPTDecimalAdd(cachedXRange.locationDecimal, offset);
@@ -455,7 +454,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
         else {
             double maxLimit = plotXRange.maxLimitDouble;
             if ( ![cachedXRange containsDouble:maxLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint(ceil( (cachedXRange.maxLimitDouble - maxLimit) / stepX ) );
+                NSUInteger numPoints = (NSUInteger)lrint(ceil((cachedXRange.maxLimitDouble - maxLimit) / stepX));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepX * numPoints);
                 cachedXRange.locationDecimal = CPTDecimalSubtract(cachedXRange.locationDecimal, offset);
@@ -464,11 +463,11 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
             }
             double minLimit = plotXRange.minLimitDouble;
             if ( ![cachedXRange containsDouble:minLimit] ) {
-                NSUInteger numPoints = (NSUInteger)lrint(ceil( (minLimit - cachedXRange.minLimitDouble) / stepX ) );
+                NSUInteger numPoints = (NSUInteger)lrint(ceil((minLimit - cachedXRange.minLimitDouble) / stepX));
 
                 NSDecimal offset = CPTDecimalFromDouble(stepX * numPoints);
                 cachedXRange.locationDecimal = CPTDecimalAdd(cachedXRange.locationDecimal, offset);
-                
+
                 [plot replaceColumnDataShiftLeft:YES numberOfRecords:numPoints columnCount:self.dataXCount rowCount:self.dataYCount];
             }
         }
@@ -484,7 +483,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 
 -(void)observeValueForKeyPath:(nullable NSString *)keyPath ofObject:(nullable id)object change:(NSDictionary<NSString *, CPTPlotSpace *> *)change context:(nullable void *)context
 {
-    if ( (context == CPTFieldFunctionDataSourceKVOContext || context == CPTContourFunctionDataSourceKVOContext) && [keyPath isEqualToString:@"plotSpace"] && [object isEqual:self.dataPlot] ) {
+    if (((context == CPTFieldFunctionDataSourceKVOContext) || (context == CPTContourFunctionDataSourceKVOContext)) && [keyPath isEqualToString:@"plotSpace"] && [object isEqual:self.dataPlot] ) {
         CPTPlotSpace *oldSpace = change[NSKeyValueChangeOldKey];
         CPTPlotSpace *newSpace = change[NSKeyValueChangeNewKey];
 
@@ -532,7 +531,7 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 {
     CPTNumericData *numericData = nil;
 
-    if ( self.dataXCount > 0 && self.dataYCount > 0) {
+    if ((self.dataXCount > 0) && (self.dataYCount > 0)) {
         CPTPlotRange *xRange = self.cachedPlotXRange;
         CPTPlotRange *yRange = self.cachedPlotYRange;
 
@@ -544,141 +543,141 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
             [self plotSpaceChanged];
             yRange = self.cachedPlotYRange;
         }
-        
+
         NSUInteger startYIndex = indexRange.location / self.dataXCount;
         NSUInteger startXIndex = indexRange.location % self.dataXCount;
-        
+
         NSUInteger lastYIndex = NSMaxRange(indexRange) / self.dataXCount;
         if ( NSMaxRange(indexRange) % self.dataXCount > 0 ) {
-            lastYIndex ++;
+            lastYIndex++;
         }
-        NSUInteger lastXIndex =  NSMaxRange(indexRange) % self.dataXCount > 0 ? NSMaxRange(indexRange) % self.dataXCount : self.dataXCount;
+        NSUInteger lastXIndex = NSMaxRange(indexRange) % self.dataXCount > 0 ? NSMaxRange(indexRange) % self.dataXCount : self.dataXCount;
 
         double startX, startY, incrementX, incrementY;
-        if ( [plot cachedNumbersForField:CPTVectorFieldPlotFieldX] == nil || indexRange.length == self.dataXCount * self.dataYCount) {
+        if (([plot cachedNumbersForField:CPTVectorFieldPlotFieldX] == nil) || (indexRange.length == self.dataXCount * self.dataYCount)) {
             double locationX = xRange.locationDouble;
             double lengthX   = xRange.lengthDouble;
-            double denomX    = (double)(self.dataXCount - ( (self.dataXCount > 1) ? 1 : 0 ) );
-            startX = locationX;
+            double denomX    = (double)(self.dataXCount - ((self.dataXCount > 1) ? 1 : 0));
+            startX     = locationX;
             incrementX = lengthX / denomX;
         }
         else {
-            if (indexRange.length < self.dataXCount ) {
-                if ( (NSInteger)startXIndex - 2 >= 0 ) {
+            if ( indexRange.length < self.dataXCount ) {
+                if ((NSInteger)startXIndex - 2 >= 0 ) {
                     incrementX = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:startXIndex - 1] - [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:startXIndex - 2];
-                    startX = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:0];
+                    startX     = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:0];
                 }
                 else {
                     incrementX = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:lastXIndex + 1] - [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:lastXIndex];
-                    startX = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:self.dataXCount - 1] - (self.dataXCount - 1) * incrementX;
+                    startX     = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:self.dataXCount - 1] - (self.dataXCount - 1) * incrementX;
                 }
             }
             else {
                 incrementX = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:lastXIndex + 1] - [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:lastXIndex];
-                startX = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:0];
+                startX     = [plot cachedDoubleForField:CPTVectorFieldPlotFieldX recordIndex:0];
             }
         }
 
-        if ( [plot cachedNumbersForField:CPTVectorFieldPlotFieldY] == nil || indexRange.length == self.dataXCount * self.dataYCount) {
+        if (([plot cachedNumbersForField:CPTVectorFieldPlotFieldY] == nil) || (indexRange.length == self.dataXCount * self.dataYCount)) {
             double locationY = yRange.locationDouble;
             double lengthY   = yRange.lengthDouble;
-            double denomY    = (double)(self.dataYCount - ( (self.dataYCount > 1) ? 1 : 0 ) );
-            startY = locationY;
+            double denomY    = (double)(self.dataYCount - ((self.dataYCount > 1) ? 1 : 0));
+            startY     = locationY;
             incrementY = lengthY / denomY;
         }
         else {
-            if ( (NSInteger)startYIndex - 2 >= 0 ) {
+            if ((NSInteger)startYIndex - 2 >= 0 ) {
                 incrementY = [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:(startYIndex - 1) * self.dataXCount] - [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:(startYIndex - 2) * self.dataXCount];
-                startY = [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:0];
+                startY     = [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:0];
             }
             else {
                 incrementY = [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:(lastYIndex + 1) * self.dataXCount] - [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:lastYIndex * self.dataXCount];
-                startY = [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:self.dataXCount * self.dataYCount - 1] - (self.dataYCount - 1) * incrementY;
+                startY     = [plot cachedDoubleForField:CPTVectorFieldPlotFieldY recordIndex:self.dataXCount * self.dataYCount - 1] - (self.dataYCount - 1) * incrementY;
             }
         }
 
-        if ([plot isKindOfClass:[CPTVectorFieldPlot class]]) {
+        if ( [plot isKindOfClass:[CPTVectorFieldPlot class]] ) {
             NSMutableData *data = [[NSMutableData alloc] initWithLength:indexRange.length * 4 * sizeof(double)];
 
-            double *xBytes = data.mutableBytes;
-            double *yBytes = data.mutableBytes + (indexRange.length * sizeof(double) );
-            double *lengthBytes = data.mutableBytes + (indexRange.length * 2 * sizeof(double) );
-            double *directionBytes = data.mutableBytes + (indexRange.length * 3 * sizeof(double) );
+            double *xBytes         = data.mutableBytes;
+            double *yBytes         = data.mutableBytes + (indexRange.length * sizeof(double));
+            double *lengthBytes    = data.mutableBytes + (indexRange.length * 2 * sizeof(double));
+            double *directionBytes = data.mutableBytes + (indexRange.length * 3 * sizeof(double));
 
             CPTFieldDataSourceBlock functionBlockX = self.dataSourceBlockX;
             CPTFieldDataSourceBlock functionBlockY = self.dataSourceBlockY;
 
             if ( functionBlockX && functionBlockY ) {
-                double _maxVectorLength = ((CPTVectorFieldPlot*)plot).maxVectorLength;
-                double fx = 0.0;
-                double fy = 0.0;
-                double x = 0.0;
-                double y = 0.0;
-                double vectorLength = 0.0;
+                double _maxVectorLength = ((CPTVectorFieldPlot *)plot).maxVectorLength;
+                double fx               = 0.0;
+                double fy               = 0.0;
+                double x                = 0.0;
+                double y                = 0.0;
+                double vectorLength     = 0.0;
                 for ( NSUInteger i = startYIndex; i < lastYIndex; i++ ) {
                     y = startY + (double)i * incrementY;
                     for ( NSUInteger j = startXIndex; j < lastXIndex; j++ ) {
-                        x = startX + (double)j * incrementX;
-                        *xBytes++ = x;
-                        *yBytes++ = y;
-                        fx = functionBlockX(x, y);
-                        fy = functionBlockY(x, y);
-                        vectorLength = sqrt(fx * fx + fy * fy);
-                        *lengthBytes++ = (double)vectorLength;
+                        x                 = startX + (double)j * incrementX;
+                        *xBytes++         = x;
+                        *yBytes++         = y;
+                        fx                = functionBlockX(x, y);
+                        fy                = functionBlockY(x, y);
+                        vectorLength      = sqrt(fx * fx + fy * fy);
+                        *lengthBytes++    = (double)vectorLength;
                         *directionBytes++ = (double)atan2(fy, fx);
-                        _maxVectorLength = MAX(_maxVectorLength, vectorLength);
+                        _maxVectorLength  = MAX(_maxVectorLength, vectorLength);
                     }
                 }
-                lengthBytes = data.mutableBytes + (indexRange.length * 2 * sizeof(double) );
-                NSUInteger yEnd = (NSInteger)lastYIndex - (NSInteger)startYIndex > 0 ?  lastYIndex - startYIndex : 0;
-                NSUInteger xEnd = (NSInteger)lastXIndex - (NSInteger)startXIndex > 0 ?  lastYIndex - startYIndex : 0;
+                lengthBytes = data.mutableBytes + (indexRange.length * 2 * sizeof(double));
+                NSUInteger yEnd = (NSInteger)lastYIndex - (NSInteger)startYIndex > 0 ? lastYIndex - startYIndex : 0;
+                NSUInteger xEnd = (NSInteger)lastXIndex - (NSInteger)startXIndex > 0 ? lastYIndex - startYIndex : 0;
                 for ( NSUInteger i = 0; i < yEnd; i++ ) {
                     for ( NSUInteger j = 0; j < xEnd; j++ ) {
                         *lengthBytes = *lengthBytes / _maxVectorLength;
                         lengthBytes++;
                     }
                 }
-                ((CPTVectorFieldPlot*)plot).maxVectorLength = _maxVectorLength;
+                ((CPTVectorFieldPlot *)plot).maxVectorLength = _maxVectorLength;
             }
-            
+
             numericData = [CPTNumericData numericDataWithData:data
-                                                 dataType:CPTDataType(CPTFloatingPointDataType, sizeof(double), CFByteOrderGetCurrent() )
-                                                    shape:@[@(indexRange.length), @4]
-                                                dataOrder:CPTDataOrderColumnsFirst];
+                                                     dataType:CPTDataType(CPTFloatingPointDataType, sizeof(double), CFByteOrderGetCurrent())
+                                                        shape:@[@(indexRange.length), @4]
+                                                    dataOrder:CPTDataOrderColumnsFirst];
         }
         else {
             NSMutableData *data = [[NSMutableData alloc] initWithLength:indexRange.length * 3 * sizeof(double)];
 
-            double *xBytes = data.mutableBytes;
-            double *yBytes = data.mutableBytes + (indexRange.length * sizeof(double) );
-            double *functionValueBytes = data.mutableBytes + (indexRange.length * 2 * sizeof(double) );
-            
+            double *xBytes             = data.mutableBytes;
+            double *yBytes             = data.mutableBytes + (indexRange.length * sizeof(double));
+            double *functionValueBytes = data.mutableBytes + (indexRange.length * 2 * sizeof(double));
+
             CPTContourDataSourceBlock functionBlock = self.dataSourceBlock;
-            
+
             if ( functionBlock ) {
-                double _maxFValue = ((CPTContourPlot*)plot).maxFunctionValue;
-                double _minFValue = ((CPTContourPlot*)plot).minFunctionValue;
-                double f = 0.0;
-                double x = 0.0;
-                double y = 0.0;
+                double _maxFValue = ((CPTContourPlot *)plot).maxFunctionValue;
+                double _minFValue = ((CPTContourPlot *)plot).minFunctionValue;
+                double f          = 0.0;
+                double x          = 0.0;
+                double y          = 0.0;
                 for ( NSUInteger i = startYIndex; i < lastYIndex; i++ ) {
                     y = startY + (double)i * incrementY;
                     for ( NSUInteger j = startXIndex; j < lastXIndex; j++ ) {
-                        x = startX + (double)j * incrementX;;
-                        *xBytes++ = x;
-                        *yBytes++ = y;
-                        f = functionBlock(x, y);
+                        x                     = startX + (double)j * incrementX;
+                        *xBytes++             = x;
+                        *yBytes++             = y;
+                        f                     = functionBlock(x, y);
                         *functionValueBytes++ = f;
-                        _maxFValue = MAX(_maxFValue, f);
-                        _minFValue = MIN(_minFValue, f);
+                        _maxFValue            = MAX(_maxFValue, f);
+                        _minFValue            = MIN(_minFValue, f);
                     }
                 }
-                ((CPTContourPlot*)plot).maxFunctionValue = _maxFValue;
-                ((CPTContourPlot*)plot).minFunctionValue = _minFValue;
+                ((CPTContourPlot *)plot).maxFunctionValue = _maxFValue;
+                ((CPTContourPlot *)plot).minFunctionValue = _minFValue;
             }
-            
+
             numericData = [CPTNumericData numericDataWithData:data
-                                                     dataType:CPTDataType(CPTFloatingPointDataType, sizeof(double), CFByteOrderGetCurrent() )
+                                                     dataType:CPTDataType(CPTFloatingPointDataType, sizeof(double), CFByteOrderGetCurrent())
                                                         shape:@[@(indexRange.length), @3]
                                                     dataOrder:CPTDataOrderColumnsFirst];
         }
@@ -689,16 +688,17 @@ static void *CPTContourFunctionDataSourceKVOContext = (void *)&CPTContourFunctio
 
 /// @endcond
 
-
 #pragma mark -
 #pragma mark Accessors
 
 /// @cond
--(NSUInteger)getDataXCount {
+-(NSUInteger)getDataXCount
+{
     return self.dataXCount;
 }
 
--(NSUInteger)getDataYCount {
+-(NSUInteger)getDataYCount
+{
     return self.dataYCount;
 }
 

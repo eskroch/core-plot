@@ -1,8 +1,8 @@
 //
-//  VectorFieldContinuousPlot.m
-//  CorePlotGallery
+// VectorFieldContinuousPlot.m
+// CorePlotGallery
 //
-//  Created by Steve Wainwright on 14/12/2020.
+// Created by Steve Wainwright on 14/12/2020.
 //
 
 #import "VectorFieldContinuousPlot.h"
@@ -26,9 +26,9 @@
 
 -(nonnull instancetype)init
 {
-    if ( (self = [super init]) ) {
+    if ((self = [super init])) {
         dataSources = [[NSMutableSet alloc] init];
-        
+
         self.title   = @"Vector Field Continuous Plot";
         self.section = kFieldsPlots;
     }
@@ -45,7 +45,6 @@
 
 -(void)renderInGraphHostingView:(nonnull CPTGraphHostingView *)hostingView withTheme:(nullable CPTTheme *)theme animated:(BOOL)animated
 {
-    
 #if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
     CGRect bounds = hostingView.bounds;
 #else
@@ -57,7 +56,7 @@
     [self applyTheme:theme toGraph:graph withDefault:[CPTTheme themeNamed:kCPTDarkGradientTheme]];
 
     graph.plotAreaFrame.masksToBorder = NO;
-    graph.defaultPlotSpace.delegate = self;
+    graph.defaultPlotSpace.delegate   = self;
 
     // Instructions
     CPTMutableTextStyle *textStyle = [CPTMutableTextStyle textStyle];
@@ -67,56 +66,55 @@
 
     // Setup scatter plot space
     CPTXYPlotSpace *plotSpace = (CPTXYPlotSpace *)graph.defaultPlotSpace;
-    plotSpace.xRange = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI) length:@(4.0 * M_PI)];
-    plotSpace.yRange = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI) length:@(4.0 * M_PI)];
+    plotSpace.xRange                = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI) length:@(4.0 * M_PI)];
+    plotSpace.yRange                = [CPTPlotRange plotRangeWithLocation:@(-2.0 * M_PI) length:@(4.0 * M_PI)];
     plotSpace.allowsUserInteraction = YES;
-    
 
     PiNumberFormatter *formatter = [[PiNumberFormatter alloc] init];
     formatter.multiplier = @4;
-    
+
     // Axes
     CPTXYAxisSet *axisSet = (CPTXYAxisSet *)graph.axisSet;
     CPTXYAxis *x          = axisSet.xAxis;
     x.majorIntervalLength   = @(M_PI / 2.0);
     x.minorTicksPerInterval = 3;
-    x.labelFormatter = formatter;
+    x.labelFormatter        = formatter;
     x.axisConstraints       = [CPTConstraints constraintWithRelativeOffset:0.5];
 
     CPTXYAxis *y = axisSet.yAxis;
     y.majorIntervalLength   = @(M_PI / 2.0);
     y.minorTicksPerInterval = 3;
-    y.axisConstraints             = [CPTConstraints constraintWithLowerOffset:0.0];
-    y.labelFormatter = formatter;
-    y.tickLabelDirection = CPTSignPositive;
+    y.axisConstraints       = [CPTConstraints constraintWithLowerOffset:0.0];
+    y.labelFormatter        = formatter;
+    y.tickLabelDirection    = CPTSignPositive;
 
     // Create a plot that uses the data source method
     CPTVectorFieldPlot *vectorFieldPlot = [[CPTVectorFieldPlot alloc] init];
-    vectorFieldPlot.identifier   = @"Vector Field [sin(x)\n        sin(y)]";
-    vectorFieldPlot.delegate     = self;
+    vectorFieldPlot.identifier = @"Vector Field [sin(x)\n        sin(y)]";
+    vectorFieldPlot.delegate   = self;
 
     // Vector properties
-    vectorFieldPlot.normalisedVectorLength = 0.25;
-    vectorFieldPlot.arrowSize = CGSizeMake(5.0, 5.0);
-    vectorFieldPlot.arrowType  = CPTVectorFieldArrowTypeSolid;
+    vectorFieldPlot.normalisedVectorLength     = 0.25;
+    vectorFieldPlot.arrowSize                  = CGSizeMake(5.0, 5.0);
+    vectorFieldPlot.arrowType                  = CPTVectorFieldArrowTypeSolid;
     vectorFieldPlot.vectorLineStylesDataSource = self;
-    vectorFieldPlot.plotSpace = plotSpace;
-    
-    CPTFieldDataSourceBlock blockX       = ^(double xVal, double yVal) {
-                NSLog(@"%f %f", xVal, yVal);
-                return sin(xVal);
-            };
-    CPTFieldDataSourceBlock blockY       = ^(double xVal, double yVal) {
-                NSLog(@"%f %f", xVal, yVal);
-                return sin(yVal);
-            };
-    
+    vectorFieldPlot.plotSpace                  = plotSpace;
+
+    CPTFieldDataSourceBlock blockX = ^(double xVal, double yVal) {
+        NSLog(@"%f %f", xVal, yVal);
+        return sin(xVal);
+    };
+    CPTFieldDataSourceBlock blockY = ^(double xVal, double yVal) {
+        NSLog(@"%f %f", xVal, yVal);
+        return sin(yVal);
+    };
+
     CPTFieldFunctionDataSource *fieldPlotDataSource = [CPTFieldFunctionDataSource dataSourceForPlot:vectorFieldPlot withBlockX:blockX withBlockY:blockY];
 
     fieldPlotDataSource.resolutionX = ceil(CPTDecimalDoubleValue(graph.plotAreaFrame.plotArea.widthDecimal) / 32.0);
     fieldPlotDataSource.resolutionY = fieldPlotDataSource.resolutionX;
 
-    vectorFieldPlot.dataSource = fieldPlotDataSource;
+    vectorFieldPlot.dataSource           = fieldPlotDataSource;
     vectorFieldPlot.alignsPointsToPixels = NO;
 
     [self.dataSources addObject:fieldPlotDataSource];
@@ -132,7 +130,7 @@
     graph.legend.cornerRadius       = 5.0;
     graph.legend.swatchCornerRadius = 3.0;
     graph.legendAnchor              = CPTRectAnchorTop;
-    graph.legendDisplacement        = CGPointMake(0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0) );
+    graph.legendDisplacement        = CGPointMake(0.0, self.titleSize * CPTFloat(-2.0) - CPTFloat(12.0));
 }
 
 #pragma mark -
@@ -146,17 +144,17 @@
 #pragma mark -
 #pragma mark Plot Source Methods
 
-
--(nullable CPTLineStyle *)lineStyleForVectorFieldPlot:(nonnull CPTVectorFieldPlot *)plot recordIndex:(NSUInteger)idx {
+-(nullable CPTLineStyle *)lineStyleForVectorFieldPlot:(nonnull CPTVectorFieldPlot *)plot recordIndex:(NSUInteger)idx
+{
     CPTMutableLineStyle *linestyle = [[CPTMutableLineStyle alloc] init];
-    double vectorLength = [plot cachedDoubleForField:CPTVectorFieldPlotFieldVectorLength recordIndex:idx];
-    double maxVectorLength = plot.maxVectorLength;
-    
-    if( vectorLength > 0.85 * maxVectorLength ) {
+    double vectorLength            = [plot cachedDoubleForField:CPTVectorFieldPlotFieldVectorLength recordIndex:idx];
+    double maxVectorLength         = plot.maxVectorLength;
+
+    if ( vectorLength > 0.85 * maxVectorLength ) {
         linestyle.lineWidth = 2.0;
         linestyle.lineColor = [CPTColor redColor];
     }
-    else if( vectorLength > 0.50 * maxVectorLength ) {
+    else if ( vectorLength > 0.50 * maxVectorLength ) {
         linestyle.lineWidth = 1.0;
         linestyle.lineColor = [CPTColor orangeColor];
     }
@@ -175,7 +173,8 @@
     NSLog(@"Range for '%@' was selected at index %d.", plot.identifier, (int)index);
 }
 
-- (NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot {
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
+{
     return 0;
 }
 

@@ -1433,12 +1433,12 @@ CPTLegendNotification const CPTLegendNeedsReloadEntriesForPlotNotification = @"C
 
 /// @cond
 
--(nullable NSMutableArray*)getLegendEntries  //added S.Wainwright
+-(nullable NSMutableArray *)getLegendEntries // added S.Wainwright
 {
     return self.legendEntries;
 }
 
--(void)setNewLegendEntries:(nonnull NSMutableArray*)entries //added S.Wainwright
+-(void)setNewLegendEntries:(nonnull NSMutableArray *)entries // added S.Wainwright
 {
     self.legendEntries = entries;
 }

@@ -1,13 +1,14 @@
 //
-//  CPTVectorFieldPlot.m
-//  CorePlot Mac
+// CPTVectorFieldPlot.m
+// CorePlot Mac
 //
-//  Created by Steve Wainwright on 13/12/2020.
+// Created by Steve Wainwright on 13/12/2020.
 //
 
 #import "CPTVectorFieldPlot.h"
 
 #import "CPTExceptions.h"
+#import "CPTFieldFunctionDataSource.h"
 #import "CPTFill.h"
 #import "CPTLegend.h"
 #import "CPTLineStyle.h"
@@ -20,7 +21,6 @@
 #import "CPTUtilities.h"
 #import "CPTXYPlotSpace.h"
 #import "NSCoderExtensions.h"
-#import "CPTFieldFunctionDataSource.h"
 #import "tgmath.h"
 
 /** @defgroup plotAnimationVectorFieldPlot Vector Field Plot
@@ -35,11 +35,11 @@
  *  @endif
  **/
 
-CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingXValues       = @"xValues";       ///< X values.
-CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingYValues       = @"yValues";       ///< Y values.
+CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingXValues               = @"xValues";         ///< X values.
+CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingYValues               = @"yValues";         ///< Y values.
 CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingVectorLengthValues    = @"lengthValues";    ///< Vector length values.
-CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingVectorDirectionValues     = @"directionValues";     ///< Vector direction values.
-CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingVectorLineStyles = @"lineStyles"; ///< Vector line styles.
+CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingVectorDirectionValues = @"directionValues"; ///< Vector direction values.
+CPTVectorFieldPlotBinding const CPTVectorFieldPlotBindingVectorLineStyles      = @"lineStyles";      ///< Vector line styles.
 
 /// @cond
 struct CGPointVector {
@@ -180,16 +180,16 @@ typedef struct CGPointVector CGPointVector;
  **/
 -(nonnull instancetype)initWithFrame:(CGRect)newFrame
 {
-    if ( (self = [super initWithFrame:newFrame]) ) {
-        normalisedVectorLength = 1.0;
-        maxVectorLength = 0.0;
-        vectorLineStyle        = [[CPTLineStyle alloc] init];
-        arrowSize              = CGSizeMake(5.0, 5.0);
+    if ((self = [super initWithFrame:newFrame])) {
+        normalisedVectorLength  = 1.0;
+        maxVectorLength         = 0.0;
+        vectorLineStyle         = [[CPTLineStyle alloc] init];
+        arrowSize               = CGSizeMake(5.0, 5.0);
         arrowType               = CPTVectorFieldArrowTypeSolid;
-        arrowFill = nil;
-        usesEvenOddClipRule = NO;
+        arrowFill               = nil;
+        usesEvenOddClipRule     = NO;
         pointingDeviceDownIndex = NSNotFound;
-        cachedArrowHeadPath = NULL;
+        cachedArrowHeadPath     = NULL;
 
         self.labelField = CPTVectorFieldPlotFieldX;
     }
@@ -202,25 +202,25 @@ typedef struct CGPointVector CGPointVector;
 
 -(nonnull instancetype)initWithLayer:(nonnull id)layer
 {
-    if ( (self = [super initWithLayer:layer]) ) {
+    if ((self = [super initWithLayer:layer])) {
         CPTVectorFieldPlot *theLayer = (CPTVectorFieldPlot *)layer;
 
-        normalisedVectorLength          = theLayer->normalisedVectorLength;
+        normalisedVectorLength = theLayer->normalisedVectorLength;
         vectorLineStyle        = theLayer->vectorLineStyle;
-        arrowSize      = theLayer->arrowSize;
-        arrowType             = theLayer->arrowType;
-        arrowFill = theLayer->arrowFill;
-        usesEvenOddClipRule = theLayer->usesEvenOddClipRule;
-        
+        arrowSize              = theLayer->arrowSize;
+        arrowType              = theLayer->arrowType;
+        arrowFill              = theLayer->arrowFill;
+        usesEvenOddClipRule    = theLayer->usesEvenOddClipRule;
+
         pointingDeviceDownIndex = NSNotFound;
-        cachedArrowHeadPath = NULL;
+        cachedArrowHeadPath     = NULL;
     }
     return self;
 }
 
 -(void)dealloc
 {
-    if (cachedArrowHeadPath != NULL) {
+    if ( cachedArrowHeadPath != NULL ) {
         CGPathRelease(cachedArrowHeadPath);
         cachedArrowHeadPath = NULL;
     }
@@ -236,32 +236,32 @@ typedef struct CGPointVector CGPointVector;
 -(void)encodeWithCoder:(nonnull NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    
+
     [coder encodeCGFloat:self.normalisedVectorLength forKey:@"CPTVectorFieldPlot.normalisedVectorLength"];
     [coder encodeObject:self.vectorLineStyle forKey:@"CPTVectorFieldPlot.vectorLineStyle"];
     [coder encodeCPTSize:self.arrowSize forKey:@"CPTVectorFieldPlot.arrowSize"];
     [coder encodeInteger:self.arrowType forKey:@"CPTVectorFieldPlot.arrowType"];
     [coder encodeObject:self.arrowFill forKey:@"CPTVectorFieldPlot.arrowFill"];
     [coder encodeBool:self.usesEvenOddClipRule forKey:@"CPTVectorFieldPlot.usesEvenOddClipRule"];
-   
+
     // No need to archive these properties:
     // pointingDeviceDownIndex
 }
 
 -(nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
-    if ( (self = [super initWithCoder:coder]) ) {
+    if ((self = [super initWithCoder:coder])) {
         normalisedVectorLength = [coder decodeCGFloatForKey:@"CPTVectorFieldPlot.normalisedVectorLength"];
-        vectorLineStyle = [[coder decodeObjectOfClass:[CPTLineStyle class]
-                                            forKey:@"CPTVectorFieldPlot.vectorLineStyle"] copy];
-        arrowSize        = [coder decodeCPTSizeForKey:@"CPTVectorFieldPlot.arrowSize"];
+        vectorLineStyle        = [[coder decodeObjectOfClass:[CPTLineStyle class]
+                                                      forKey:@"CPTVectorFieldPlot.vectorLineStyle"] copy];
+        arrowSize = [coder decodeCPTSizeForKey:@"CPTVectorFieldPlot.arrowSize"];
         arrowType = (CPTVectorFieldArrowType)[coder decodeIntegerForKey:@"CPTVectorFieldPlot.arrowType"];
         arrowFill = [coder decodeObjectOfClass:[CPTFill class]
-                                   forKey:@"CPTVectorFieldPlot.fill"];
+                                        forKey:@"CPTVectorFieldPlot.fill"];
         usesEvenOddClipRule = [coder decodeBoolForKey:@"CPTVectorFieldPlot.usesEvenOddClipRule"];
-        
+
         pointingDeviceDownIndex = NSNotFound;
-        cachedArrowHeadPath = NULL;
+        cachedArrowHeadPath     = NULL;
     }
     return self;
 }
@@ -291,9 +291,9 @@ typedef struct CGPointVector CGPointVector;
         return;
     }
 
-    CPTPlotRangeComparisonResult *xRangeFlags = calloc(dataCount, sizeof(CPTPlotRangeComparisonResult) );
-    CPTPlotRangeComparisonResult *yRangeFlags = calloc(dataCount, sizeof(CPTPlotRangeComparisonResult) );
-    BOOL *nanFlags                            = calloc(dataCount, sizeof(BOOL) );
+    CPTPlotRangeComparisonResult *xRangeFlags = calloc(dataCount, sizeof(CPTPlotRangeComparisonResult));
+    CPTPlotRangeComparisonResult *yRangeFlags = calloc(dataCount, sizeof(CPTPlotRangeComparisonResult));
+    BOOL *nanFlags                            = calloc(dataCount, sizeof(BOOL));
 
     CPTPlotRange *xRange = xyPlotSpace.xRange;
     CPTPlotRange *yRange = xyPlotSpace.yRange;
@@ -345,24 +345,24 @@ typedef struct CGPointVector CGPointVector;
 
     // Calculate points
     if ( self.doublePrecisionCache ) {
-        const double *xBytes     = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldX].data.bytes;
-        const double *yBytes     = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldY].data.bytes;
-        const double *lengthBytes   = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorLength].data.bytes;
-        double maxLength = DBL_MIN;
-        for( NSUInteger i = 0; i < dataCount; i++) {
+        const double *xBytes      = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldX].data.bytes;
+        const double *yBytes      = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldY].data.bytes;
+        const double *lengthBytes = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorLength].data.bytes;
+        double maxLength          = DBL_MIN;
+        for ( NSUInteger i = 0; i < dataCount; i++ ) {
             maxLength = MAX(maxLength, lengthBytes[i]);
         }
         self.maxVectorLength = maxLength;
-        double factor = (double)self.normalisedVectorLength / maxLength;
-        const double *directionBytes   = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorDirection].data.bytes;
-        
+        double factor                = (double)self.normalisedVectorLength / maxLength;
+        const double *directionBytes = (const double *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorDirection].data.bytes;
+
         dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-            const double x     = xBytes[i];
-            const double y     = yBytes[i];
-            const double length  = factor * lengthBytes[i];
-            const double direction   = directionBytes[i];
-            
-            if ( !drawPointFlags[i] || isnan(x) || isnan(y) ) {
+            const double x         = xBytes[i];
+            const double y         = yBytes[i];
+            const double length    = factor * lengthBytes[i];
+            const double direction = directionBytes[i];
+
+            if ( !drawPointFlags[i] || isnan(x) || isnan(y)) {
                 viewPoints[i].x = CPTNAN; // depending coordinates
                 viewPoints[i].y = CPTNAN;
             }
@@ -377,30 +377,30 @@ typedef struct CGPointVector CGPointVector;
                 plotPoint[CPTCoordinateX] = x + length * cos(direction);
                 plotPoint[CPTCoordinateY] = y + length * sin(direction);
                 pos                       = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
-                viewPoints[i].tip_x        = pos.x;
-                viewPoints[i].tip_y        = pos.y;
+                viewPoints[i].tip_x       = pos.x;
+                viewPoints[i].tip_y       = pos.y;
             }
         });
     }
     else {
-        const NSDecimal *xBytes     = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldX].data.bytes;
-        const NSDecimal *yBytes     = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldY].data.bytes;
-        const NSDecimal *lengthBytes  = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorLength].data.bytes;
-        double maxLength = DBL_MIN;
-        for( NSUInteger i = 0; i < dataCount; i++) {
+        const NSDecimal *xBytes      = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldX].data.bytes;
+        const NSDecimal *yBytes      = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldY].data.bytes;
+        const NSDecimal *lengthBytes = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorLength].data.bytes;
+        double maxLength             = DBL_MIN;
+        for ( NSUInteger i = 0; i < dataCount; i++ ) {
             maxLength = MAX(maxLength, CPTDecimalDoubleValue(lengthBytes[i]));
         }
         self.maxVectorLength = maxLength;
-        NSDecimal factor = CPTDecimalFromDouble((double)self.normalisedVectorLength / maxLength);
-        const NSDecimal *directionBytes   = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorDirection].data.bytes;
-        
-        dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
-            const NSDecimal x     = xBytes[i];
-            const NSDecimal y     = yBytes[i];
-            const NSDecimal length  = CPTDecimalMultiply(lengthBytes[i], factor);
-            const NSDecimal direction   = directionBytes[i];
+        NSDecimal factor                = CPTDecimalFromDouble((double)self.normalisedVectorLength / maxLength);
+        const NSDecimal *directionBytes = (const NSDecimal *)[self cachedNumbersForField:CPTVectorFieldPlotFieldVectorDirection].data.bytes;
 
-            if ( !drawPointFlags[i] || NSDecimalIsNotANumber(&x) || NSDecimalIsNotANumber(&y) ) {
+        dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
+            const NSDecimal x         = xBytes[i];
+            const NSDecimal y         = yBytes[i];
+            const NSDecimal length    = CPTDecimalMultiply(lengthBytes[i], factor);
+            const NSDecimal direction = directionBytes[i];
+
+            if ( !drawPointFlags[i] || NSDecimalIsNotANumber(&x) || NSDecimalIsNotANumber(&y)) {
                 viewPoints[i].x = CPTNAN; // depending coordinates
                 viewPoints[i].y = CPTNAN;
             }
@@ -414,9 +414,9 @@ typedef struct CGPointVector CGPointVector;
 
                 if ( !NSDecimalIsNotANumber(&length) && !NSDecimalIsNotANumber(&direction)) {
                     plotPoint[CPTCoordinateX] = x;
-                    double _length = CPTDecimalDoubleValue(length);
-                    double _direction = CPTDecimalDoubleValue(direction);
-                    
+                    double _length            = CPTDecimalDoubleValue(length);
+                    double _direction         = CPTDecimalDoubleValue(direction);
+
                     NSDecimal deltaX = CPTDecimalFromDouble(_length * sin(_direction));
                     NSDecimal deltaY = CPTDecimalFromDouble(_length * cos(_direction));
                     NSDecimal x_tip, y_tip;
@@ -425,8 +425,8 @@ typedef struct CGPointVector CGPointVector;
                     plotPoint[CPTCoordinateX] = x_tip;
                     plotPoint[CPTCoordinateY] = y_tip;
                     pos                       = [thePlotSpace plotAreaViewPointForPlotPoint:plotPoint numberOfCoordinates:2];
-                    viewPoints[i].tip_x        = pos.x;
-                    viewPoints[i].tip_y        = pos.y;
+                    viewPoints[i].tip_x       = pos.x;
+                    viewPoints[i].tip_y       = pos.y;
                 }
                 else {
                     viewPoints[i].tip_x = CPTNAN;
@@ -441,18 +441,18 @@ typedef struct CGPointVector CGPointVector;
 {
     // Align to device pixels if there is a data line.
     // Otherwise, align to view space, so fills are sharp at edges.
-    if ( self.vectorLineStyle.lineWidth > CPTFloat(0.0) ) {
+    if ( self.vectorLineStyle.lineWidth > CPTFloat(0.0)) {
         dispatch_apply(dataCount, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t i) {
             if ( drawPointFlags[i] ) {
                 CGFloat x       = viewPoints[i].x;
                 CGFloat y       = viewPoints[i].y;
-                CGPoint pos     = CPTAlignPointToUserSpace(context, CPTPointMake(x, y) );
+                CGPoint pos     = CPTAlignPointToUserSpace(context, CPTPointMake(x, y));
                 viewPoints[i].x = pos.x;
                 viewPoints[i].y = pos.y;
-                
+
                 CGFloat tip_x       = viewPoints[i].tip_x;
                 CGFloat tip_y       = viewPoints[i].tip_y;
-                pos                 = CPTAlignPointToUserSpace(context, CPTPointMake(tip_x, tip_y) );
+                pos                 = CPTAlignPointToUserSpace(context, CPTPointMake(tip_x, tip_y));
                 viewPoints[i].tip_x = pos.x;
                 viewPoints[i].tip_y = pos.y;
             }
@@ -463,14 +463,14 @@ typedef struct CGPointVector CGPointVector;
             if ( drawPointFlags[i] ) {
                 CGFloat x       = viewPoints[i].x;
                 CGFloat y       = viewPoints[i].y;
-                CGPoint pos     = CPTAlignIntegralPointToUserSpace(context, CPTPointMake(x, y) );
+                CGPoint pos     = CPTAlignIntegralPointToUserSpace(context, CPTPointMake(x, y));
                 viewPoints[i].x = pos.x;
                 viewPoints[i].y = pos.y;
 
-                CGFloat tip_x       = viewPoints[i].tip_x;
-                CGFloat tip_y       = viewPoints[i].tip_y;
+                CGFloat tip_x = viewPoints[i].tip_x;
+                CGFloat tip_y = viewPoints[i].tip_y;
 
-                pos                 = CPTAlignPointToUserSpace(context, CPTPointMake(tip_x, tip_y) );
+                pos                 = CPTAlignPointToUserSpace(context, CPTPointMake(tip_x, tip_y));
                 viewPoints[i].tip_x = pos.x;
                 viewPoints[i].tip_y = pos.y;
             }
@@ -490,7 +490,7 @@ typedef struct CGPointVector CGPointVector;
                 result = i;
                 break;
             }
-            if ( (delta < 0) && (i == 0) ) {
+            if ((delta < 0) && (i == 0)) {
                 break;
             }
         }
@@ -530,12 +530,12 @@ typedef struct CGPointVector CGPointVector;
             id newDirectionValues = [self numbersFromDataSourceForField:CPTVectorFieldPlotFieldVectorDirection recordIndexRange:indexRange];
             [self cacheNumbers:newDirectionValues forField:CPTVectorFieldPlotFieldVectorDirection atRecordIndex:indexRange.location];
         }
-//        else {
-//            self.xValues     = nil;
-//            self.yValues     = nil;
-//            self.lengthValues  = nil;
-//            self.directionValues   = nil;
-//        }
+// else {
+// self.xValues     = nil;
+// self.yValues     = nil;
+// self.lengthValues  = nil;
+// self.directionValues   = nil;
+// }
     }
 }
 
@@ -555,8 +555,8 @@ typedef struct CGPointVector CGPointVector;
 -(void)reloadVectorLineStylesInIndexRange:(NSRange)indexRange
 {
     id<CPTVectorFieldPlotDataSource> theDataSource = (id<CPTVectorFieldPlotDataSource>)self.dataSource;
-    
-    if ([theDataSource isKindOfClass:[CPTFieldFunctionDataSource class]]) {
+
+    if ( [theDataSource isKindOfClass:[CPTFieldFunctionDataSource class]] ) {
         theDataSource = (id<CPTVectorFieldPlotDataSource>)self.vectorLineStylesDataSource;
     }
 
@@ -597,7 +597,6 @@ typedef struct CGPointVector CGPointVector;
     [self setNeedsDisplay];
 }
 
-
 #pragma mark -
 #pragma mark Drawing
 
@@ -612,10 +611,11 @@ typedef struct CGPointVector CGPointVector;
     CPTMutableNumericData *xValueData = [self cachedNumbersForField:CPTVectorFieldPlotFieldX];
     CPTMutableNumericData *yValueData = [self cachedNumbersForField:CPTVectorFieldPlotFieldY];
 
-    if ( (xValueData == nil) || (yValueData == nil) ) {
+    if ((xValueData == nil) || (yValueData == nil)) {
         return;
     }
     NSUInteger dataCount = self.cachedDataCount;
+
     if ( dataCount == 0 ) {
         return;
     }
@@ -626,10 +626,11 @@ typedef struct CGPointVector CGPointVector;
     [super renderAsVectorInContext:context];
 
     // Calculate view points, and align to user space
-    CGPointVector *viewPoints = calloc(dataCount, sizeof(CGPointVector) );
-    BOOL *drawPointFlags     = calloc(dataCount, sizeof(BOOL) );
+    CGPointVector *viewPoints = calloc(dataCount, sizeof(CGPointVector));
+    BOOL *drawPointFlags      = calloc(dataCount, sizeof(BOOL));
 
     CPTXYPlotSpace *thePlotSpace = (CPTXYPlotSpace *)self.plotSpace;
+
     [self calculatePointsToDraw:drawPointFlags numberOfPoints:dataCount forPlotSpace:thePlotSpace includeVisiblePointsOnly:NO];
     [self calculateViewPoints:viewPoints withDrawPointFlags:drawPointFlags numberOfPoints:dataCount];
     if ( self.alignsPointsToPixels ) {
@@ -641,16 +642,15 @@ typedef struct CGPointVector CGPointVector;
     NSInteger firstDrawnPointIndex = [self extremeDrawnPointIndexForFlags:drawPointFlags numberOfPoints:dataCount extremeNumIsLowerBound:YES];
 
     if ( firstDrawnPointIndex != NSNotFound ) {
-        
-        BOOL alignPoints     = self.alignsPointsToPixels;
-        
+        BOOL alignPoints = self.alignsPointsToPixels;
+
         [self reloadVectorLineStylesInIndexRange:NSMakeRange((NSUInteger)firstDrawnPointIndex, (NSUInteger)(lastDrawnPointIndex - firstDrawnPointIndex))];
 
         for ( NSUInteger i = (NSUInteger)firstDrawnPointIndex; i <= (NSUInteger)lastDrawnPointIndex; i++ ) {
             [self drawVectorInContext:context
-                           lineStyle:[self vectorLineStyleForIndex:i]
-                           viewPoint:&viewPoints[i]
-                         alignPoints:alignPoints];
+                            lineStyle:[self vectorLineStyleForIndex:i]
+                            viewPoint:&viewPoints[i]
+                          alignPoints:alignPoints];
         }
     }
 
@@ -659,18 +659,18 @@ typedef struct CGPointVector CGPointVector;
 }
 
 -(void)drawVectorInContext:(nonnull CGContextRef)context
-                lineStyle:(nonnull CPTLineStyle *)lineStyle
-                viewPoint:(nonnull CGPointVector *)viewPoint
-              alignPoints:(BOOL)alignPoints
+                 lineStyle:(nonnull CPTLineStyle *)lineStyle
+                 viewPoint:(nonnull CGPointVector *)viewPoint
+               alignPoints:(BOOL)alignPoints
 {
-    if ( [lineStyle isKindOfClass:[CPTLineStyle class]] && !isnan(viewPoint->x) && !isnan(viewPoint->y) ) {
+    if ( [lineStyle isKindOfClass:[CPTLineStyle class]] && !isnan(viewPoint->x) && !isnan(viewPoint->y)) {
         CPTAlignPointFunction alignmentFunction = CPTAlignPointToUserSpace;
 
         CGFloat lineWidth = lineStyle.lineWidth;
-        if ( (self.contentsScale > CPTFloat(1.0) ) && (round(lineWidth) == lineWidth) ) {
+        if ((self.contentsScale > CPTFloat(1.0)) && (round(lineWidth) == lineWidth)) {
             alignmentFunction = CPTAlignIntegralPointToUserSpace;
         }
-        
+
         CPTLineStyle *theLineStyle = nil;
         CPTFill *theFill           = nil;
 
@@ -678,69 +678,69 @@ typedef struct CGPointVector CGPointVector;
             case CPTVectorFieldArrowTypeSolid:
             case CPTVectorFieldArrowTypeSwept:
                 theLineStyle = lineStyle;
-                if( self.arrowFill == nil ) {
-                    if( theLineStyle.lineColor != nil ) {
+                if ( self.arrowFill == nil ) {
+                    if ( theLineStyle.lineColor != nil ) {
                         CPTColor *lineColor = theLineStyle.lineColor;
-                        theFill      = [CPTFill fillWithColor:lineColor];
+                        theFill = [CPTFill fillWithColor:lineColor];
                     }
                 }
                 else {
-                    theFill      = self.arrowFill;
+                    theFill = self.arrowFill;
                 }
                 break;
-                
+
             case CPTVectorFieldArrowTypeOpen:
                 theLineStyle = lineStyle;
-                
+
             default:
                 break;
         }
 
         // tip
-        if ( !isnan(viewPoint->tip_x) && !isnan(viewPoint->tip_y) && ( theLineStyle || theFill ) ) {
+        if ( !isnan(viewPoint->tip_x) && !isnan(viewPoint->tip_y) && (theLineStyle || theFill)) {
             CGMutablePathRef path = CGPathCreateMutable();
-            
+
             CGPoint alignedBasePoint = CPTPointMake(viewPoint->x, viewPoint->y);
-            CGPoint alignedTipPoint = CPTPointMake(viewPoint->tip_x, viewPoint->tip_y);
+            CGPoint alignedTipPoint  = CPTPointMake(viewPoint->tip_x, viewPoint->tip_y);
             if ( alignPoints ) {
                 alignedBasePoint = alignmentFunction(context, alignedBasePoint);
                 alignedTipPoint  = alignmentFunction(context, alignedTipPoint);
             }
-            if ( CGPointEqualToPoint(alignedBasePoint, alignedTipPoint) ) {
-                CGPathMoveToPoint(path, NULL, alignedBasePoint.x-1, alignedBasePoint.y-1);
-                CGPathAddEllipseInRect(path, NULL, CGRectMake(alignedBasePoint.x-1, alignedBasePoint.y-1, 2.0, 2.0));
+            if ( CGPointEqualToPoint(alignedBasePoint, alignedTipPoint)) {
+                CGPathMoveToPoint(path, NULL, alignedBasePoint.x - 1, alignedBasePoint.y - 1);
+                CGPathAddEllipseInRect(path, NULL, CGRectMake(alignedBasePoint.x - 1, alignedBasePoint.y - 1, 2.0, 2.0));
                 CGContextBeginPath(context);
                 CGContextAddPath(context, path);
                 [theLineStyle setLineStyleInContext:context];
                 [theLineStyle strokePathInContext:context];
             }
             else {
-                CGPathMoveToPoint(path, NULL, alignedBasePoint.x-1, alignedBasePoint.y-1);
-                CGPathAddEllipseInRect(path, NULL, CGRectMake(alignedBasePoint.x-1, alignedBasePoint.y-1, 2.0, 2.0));
+                CGPathMoveToPoint(path, NULL, alignedBasePoint.x - 1, alignedBasePoint.y - 1);
+                CGPathAddEllipseInRect(path, NULL, CGRectMake(alignedBasePoint.x - 1, alignedBasePoint.y - 1, 2.0, 2.0));
                 CGPathMoveToPoint(path, NULL, alignedBasePoint.x, alignedBasePoint.y);
                 CGPathAddLineToPoint(path, NULL, alignedTipPoint.x, alignedTipPoint.y);
-                
+
                 CGFloat direction = atan((alignedTipPoint.y - alignedBasePoint.y) / (alignedTipPoint.x - alignedBasePoint.x)) + ((alignedTipPoint.x - alignedBasePoint.x) < 0.0 ? M_PI : 0.0);
 
                 CGContextBeginPath(context);
                 CGContextAddPath(context, path);
                 [theLineStyle setLineStyleInContext:context];
                 [theLineStyle strokePathInContext:context];
-                
+
                 CGContextSaveGState(context);
                 CGContextTranslateCTM(context, alignedTipPoint.x, alignedTipPoint.y);
-                CGContextRotateCTM(context, direction - CPTFloat(M_PI_2) ); // standard symbol points up
-                
+                CGContextRotateCTM(context, direction - CPTFloat(M_PI_2)); // standard symbol points up
+
                 CGPathRef theArrowHeadPath = self.cachedArrowHeadPath;
 
                 if ( theFill ) {
                     // use fillRect instead of fillPath so that images and gradients are properly centered in the symbol
                     CGSize arrowHeadSize = self.arrowSize;
-                    CGSize halfSize   = CPTSizeMake(arrowHeadSize.width / CPTFloat(2.0), arrowHeadSize.height / CPTFloat(2.0) );
-                    CGRect bounds     = CPTRectMake(-halfSize.width, -halfSize.height, arrowHeadSize.width, arrowHeadSize.height);
+                    CGSize halfSize      = CPTSizeMake(arrowHeadSize.width / CPTFloat(2.0), arrowHeadSize.height / CPTFloat(2.0));
+                    CGRect bounds        = CPTRectMake(-halfSize.width, -halfSize.height, arrowHeadSize.width, arrowHeadSize.height);
 
                     CGContextSaveGState(context);
-                    if ( !CGPathIsEmpty(theArrowHeadPath) ) {
+                    if ( !CGPathIsEmpty(theArrowHeadPath)) {
                         CGContextBeginPath(context);
                         CGContextAddPath(context, theArrowHeadPath);
                         if ( self.usesEvenOddClipRule ) {
@@ -773,20 +773,19 @@ typedef struct CGPointVector CGPointVector;
     [super drawSwatchForLegend:legend atIndex:idx inRect:rect inContext:context];
 
     if ( self.drawLegendSwatchDecoration ) {
-        
         CPTLineStyle *theVectorLineStyle = [self vectorLineStyleForIndex:idx];
 
         if ( [theVectorLineStyle isKindOfClass:[CPTLineStyle class]] ) {
             CGPointVector viewPoint;
             viewPoint.x     = CGRectGetMinX(rect);
             viewPoint.y     = CGRectGetMidY(rect);
-            viewPoint.tip_x  = CGRectGetMaxX(rect);
-            viewPoint.tip_y   = CGRectGetMidY(rect);
+            viewPoint.tip_x = CGRectGetMaxX(rect);
+            viewPoint.tip_y = CGRectGetMidY(rect);
 
             [self drawVectorInContext:context
-                           lineStyle:theVectorLineStyle
-                           viewPoint:&viewPoint
-                         alignPoints:YES];
+                            lineStyle:theVectorLineStyle
+                            viewPoint:&viewPoint
+                          alignPoints:YES];
         }
     }
 }
@@ -795,7 +794,7 @@ typedef struct CGPointVector CGPointVector;
 {
     CPTLineStyle *theLineStyle = [self cachedValueForKey:CPTVectorFieldPlotBindingVectorLineStyles recordIndex:idx];
 
-    if ( (theLineStyle == nil) || (theLineStyle == [CPTPlot nilData]) ) {
+    if ((theLineStyle == nil) || (theLineStyle == [CPTPlot nilData])) {
         theLineStyle = self.vectorLineStyle;
     }
 
@@ -817,7 +816,7 @@ typedef struct CGPointVector CGPointVector;
 -(nullable CGPathRef)newArrowHeadPath
 {
     CGSize arrowHeadSize = self.arrowSize;
-    CGSize halfSize    = CPTSizeMake(arrowHeadSize.width / CPTFloat(2.0), arrowHeadSize.height / CPTFloat(2.0) );
+    CGSize halfSize      = CPTSizeMake(arrowHeadSize.width / CPTFloat(2.0), arrowHeadSize.height / CPTFloat(2.0));
 
     CGMutablePathRef arrowHeadPath = CGPathCreateMutable();
 
@@ -828,25 +827,24 @@ typedef struct CGPointVector CGPointVector;
 
         case CPTVectorFieldArrowTypeOpen:
             CGPathMoveToPoint(arrowHeadPath, NULL, -halfSize.width, -halfSize.height);
-            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), CPTFloat(0.0) );
+            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), CPTFloat(0.0));
             CGPathAddLineToPoint(arrowHeadPath, NULL, halfSize.width, -halfSize.height);
             break;
 
         case CPTVectorFieldArrowTypeSolid:
             CGPathMoveToPoint(arrowHeadPath, NULL, -halfSize.width, -halfSize.height);
-            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), CPTFloat(0.0) );
+            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), CPTFloat(0.0));
             CGPathAddLineToPoint(arrowHeadPath, NULL, halfSize.width, -halfSize.height);
             CGPathCloseSubpath(arrowHeadPath);
             break;
 
         case CPTVectorFieldArrowTypeSwept:
             CGPathMoveToPoint(arrowHeadPath, NULL, -halfSize.width, -halfSize.height);
-            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), CPTFloat(0.0) );
+            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), CPTFloat(0.0));
             CGPathAddLineToPoint(arrowHeadPath, NULL, halfSize.width, -halfSize.height);
-            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), -arrowHeadSize.height * CPTFloat(0.375) );
+            CGPathAddLineToPoint(arrowHeadPath, NULL, CPTFloat(0.0), -arrowHeadSize.height * CPTFloat(0.375));
             CGPathCloseSubpath(arrowHeadPath);
             break;
-
     }
     return arrowHeadPath;
 }
@@ -903,11 +901,11 @@ typedef struct CGPointVector CGPointVector;
     switch ( coord ) {
         case CPTCoordinateX:
             result = @[@(CPTVectorFieldPlotFieldX)];
-            break;
+        break;
 
         case CPTCoordinateY:
             result = @[@(CPTVectorFieldPlotFieldY)];
-            break;
+        break;
 
         default:
             [NSException raise:CPTException format:@"Invalid coordinate passed to fieldIdentifiersForCoordinate:"];
@@ -951,7 +949,7 @@ typedef struct CGPointVector CGPointVector;
     BOOL positiveDirection = YES;
     CPTPlotRange *yRange   = [self.plotSpace plotRangeForCoordinate:CPTCoordinateY];
 
-    if ( CPTDecimalLessThan(yRange.lengthDecimal, CPTDecimalFromInteger(0) ) ) {
+    if ( CPTDecimalLessThan(yRange.lengthDecimal, CPTDecimalFromInteger(0))) {
         positiveDirection = !positiveDirection;
     }
 
@@ -975,14 +973,15 @@ typedef struct CGPointVector CGPointVector;
 
 -(NSUInteger)dataIndexFromInteractionPoint:(CGPoint)point
 {
-    NSUInteger dataCount     = self.cachedDataCount;
-    CGPointVector *viewPoints = calloc(dataCount, sizeof(CGPointVector) );
-    BOOL *drawPointFlags     = calloc(dataCount, sizeof(BOOL) );
+    NSUInteger dataCount      = self.cachedDataCount;
+    CGPointVector *viewPoints = calloc(dataCount, sizeof(CGPointVector));
+    BOOL *drawPointFlags      = calloc(dataCount, sizeof(BOOL));
 
     [self calculatePointsToDraw:drawPointFlags numberOfPoints:dataCount forPlotSpace:(id)self.plotSpace includeVisiblePointsOnly:YES];
     [self calculateViewPoints:viewPoints withDrawPointFlags:drawPointFlags numberOfPoints:dataCount];
 
     NSInteger result = [self extremeDrawnPointIndexForFlags:drawPointFlags numberOfPoints:dataCount extremeNumIsLowerBound:YES];
+
     if ( result != NSNotFound ) {
         CGPointVector lastViewPoint;
         CGFloat minimumDistanceSquared = CPTNAN;
@@ -991,7 +990,7 @@ typedef struct CGPointVector CGPointVector;
                 lastViewPoint = viewPoints[i];
                 CGPoint lastPoint       = CPTPointMake(lastViewPoint.x, lastViewPoint.y);
                 CGFloat distanceSquared = squareOfDistanceBetweenPoints(point, lastPoint);
-                if ( isnan(minimumDistanceSquared) || (distanceSquared < minimumDistanceSquared) ) {
+                if ( isnan(minimumDistanceSquared) || (distanceSquared < minimumDistanceSquared)) {
                     minimumDistanceSquared = distanceSquared;
                     result                 = (NSInteger)i;
                 }
@@ -1000,10 +999,10 @@ typedef struct CGPointVector CGPointVector;
         if ( result != NSNotFound ) {
             lastViewPoint = viewPoints[result];
 
-            if ( !isnan(lastViewPoint.tip_x) && (point.x > lastViewPoint.tip_x) ) {
+            if ( !isnan(lastViewPoint.tip_x) && (point.x > lastViewPoint.tip_x)) {
                 result = NSNotFound;
             }
-            if ( !isnan(lastViewPoint.tip_y) && (point.x > lastViewPoint.tip_y) ) {
+            if ( !isnan(lastViewPoint.tip_y) && (point.x > lastViewPoint.tip_y)) {
                 result = NSNotFound;
             }
         }
@@ -1048,6 +1047,7 @@ typedef struct CGPointVector CGPointVector;
     }
 
     id<CPTVectorFieldPlotDelegate> theDelegate = (id<CPTVectorFieldPlotDelegate>)self.delegate;
+
     if ( [theDelegate respondsToSelector:@selector(vectorFieldPlot:vectorFieldTouchDownAtRecordIndex:)] ||
          [theDelegate respondsToSelector:@selector(vectorFieldPlot:vectorFieldTouchDownAtRecordIndex:withEvent:)] ||
          [theDelegate respondsToSelector:@selector(vectorFieldPlot:vectorFieldWasSelectedAtRecordIndex:)] ||
@@ -1117,6 +1117,7 @@ typedef struct CGPointVector CGPointVector;
     }
 
     id<CPTVectorFieldPlotDelegate> theDelegate = (id<CPTVectorFieldPlotDelegate>)self.delegate;
+
     if ( [theDelegate respondsToSelector:@selector(vectorFieldPlot:vectorFieldTouchUpAtRecordIndex:)] ||
          [theDelegate respondsToSelector:@selector(vectorFieldPlot:vectorFieldTouchUpAtRecordIndex:withEvent:)] ||
          [theDelegate respondsToSelector:@selector(vectorFieldPlot:vectorFieldWasSelectedAtRecordIndex:)] ||
@@ -1177,7 +1178,7 @@ typedef struct CGPointVector CGPointVector;
 
 -(void)setArrowSize:(CGSize)newArrowSize
 {
-    if ( !CGSizeEqualToSize(arrowSize, newArrowSize) ) {
+    if ( !CGSizeEqualToSize(arrowSize, newArrowSize)) {
         arrowSize = newArrowSize;
         [self setCachedArrowHeadPath:NULL];
         [self setNeedsDisplay];

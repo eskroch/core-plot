@@ -99,7 +99,7 @@
     if ( newThemeName != currentThemeName ) {
         currentThemeName = [newThemeName copy];
 // added S.Wainwright
-        if ([newThemeName containsString:@" Polar"]) {
+        if ( [newThemeName containsString:@" Polar"] ) {
             self.themeBarButton.title = [NSString stringWithFormat:@"Theme: %@", [newThemeName stringByReplacingOccurrencesOfString:@" Polar" withString:@""]];
         }
         else {
@@ -130,6 +130,7 @@
     self.currentThemeName = themeName;
 
     UIView *hostView = self.hostingView;
+
     if ( hostView ) {
         [self.detailItem renderInView:hostView withTheme:[self currentTheme] animated:YES];
     }
@@ -140,10 +141,11 @@
     NSDictionary<NSString *, NSString *> *themeInfo = notification.userInfo;
 
     NSString *themeName = themeInfo[PlotGalleryThemeNameKey];
+
     if ( themeName ) {
         // added S.Wainwright
-        if ( [self.detailItem.section isEqualToString: kPolarPlots] && !([themeName isEqualToString:kThemeTableViewControllerNoTheme] || [themeName isEqualToString:kThemeTableViewControllerDefaultTheme])) {
-            NSMutableString *mutableThemeName = [NSMutableString stringWithString: themeName];
+        if ( [self.detailItem.section isEqualToString:kPolarPlots] && !([themeName isEqualToString:kThemeTableViewControllerNoTheme] || [themeName isEqualToString:kThemeTableViewControllerDefaultTheme])) {
+            NSMutableString *mutableThemeName = [NSMutableString stringWithString:themeName];
             [mutableThemeName appendString:@" Polar"];
             [self themeSelectedWithName:mutableThemeName];
         }

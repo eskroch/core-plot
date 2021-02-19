@@ -4,7 +4,6 @@
 
 /// @file
 
-
 /**
  *  @brief An Objective-C block called to generate plot data in a CPTFieldFunctionDataSource datasource.
  **/
@@ -30,18 +29,18 @@ typedef double (^CPTContourDataSourceBlock)(double, double);
 /// @name Factory Methods
 /// @{
 
-+(nonnull instancetype)dataSourceForPlot:(nonnull CPTPlot *)plot withBlockX:(nonnull CPTFieldDataSourceBlock) blockX withBlockY:(nullable CPTFieldDataSourceBlock) blockY NS_SWIFT_NAME(init(for:withBlockX:withBlockY:) );
++(nonnull instancetype)dataSourceForPlot:(nonnull CPTPlot *)plot withBlockX:(nonnull CPTFieldDataSourceBlock)blockX withBlockY:(nullable CPTFieldDataSourceBlock) blockY NS_SWIFT_NAME(init(for:withBlockX:withBlockY:));
 
-+(nonnull instancetype)dataSourceForPlot:(nonnull CPTPlot *)plot withBlock:(nonnull CPTContourDataSourceBlock)block NS_SWIFT_NAME(init(for:withBlock:) );
++(nonnull instancetype)dataSourceForPlot:(nonnull CPTPlot *)plot withBlock:(nonnull CPTContourDataSourceBlock) block NS_SWIFT_NAME(init(for:withBlock:));
 
 /// @}
 
 /// @name Initialization
 /// @{
 
--(nonnull instancetype)initForPlot:(nonnull CPTPlot *)plot withBlockX:(nonnull CPTFieldDataSourceBlock) blockX withBlockY:(nullable CPTFieldDataSourceBlock) blockY NS_SWIFT_NAME(init(for:withBlockX:withBlockY:) );
+-(nonnull instancetype)initForPlot:(nonnull CPTPlot *)plot withBlockX:(nonnull CPTFieldDataSourceBlock)blockX withBlockY:(nullable CPTFieldDataSourceBlock) blockY NS_SWIFT_NAME(init(for:withBlockX:withBlockY:));
 
--(nonnull instancetype)initForPlot:(nonnull CPTPlot *)plot withBlock:(nonnull CPTContourDataSourceBlock)block NS_SWIFT_NAME(init(for:withBlock:) );
+-(nonnull instancetype)initForPlot:(nonnull CPTPlot *)plot withBlock:(nonnull CPTContourDataSourceBlock) block NS_SWIFT_NAME(init(for:withBlock:));
 
 /// @}
 

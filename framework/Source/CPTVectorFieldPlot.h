@@ -1,8 +1,8 @@
 //
-//  CPTVectorFieldPlot.h
-//  CorePlot Mac
+// CPTVectorFieldPlot.h
+// CorePlot Mac
 //
-//  Created by Steve Wainwright on 13/12/2020.
+// Created by Steve Wainwright on 13/12/2020.
 //
 
 #import "CPTDefinitions.h"
@@ -30,10 +30,10 @@ extern CPTVectorFieldPlotBinding __nonnull const CPTVectorFieldPlotBindingVector
  *  @brief Enumeration of VectorField plot data source field types
  **/
 typedef NS_ENUM (NSInteger, CPTVectorFieldPlotField) {
-    CPTVectorFieldPlotFieldX,     ///< X values.
-    CPTVectorFieldPlotFieldY,     ///< Y values.
-    CPTVectorFieldPlotFieldVectorLength,  ///< vector length values.
-    CPTVectorFieldPlotFieldVectorDirection,   ///< vector direction values.
+    CPTVectorFieldPlotFieldX,              ///< X values.
+    CPTVectorFieldPlotFieldY,              ///< Y values.
+    CPTVectorFieldPlotFieldVectorLength,   ///< vector length values.
+    CPTVectorFieldPlotFieldVectorDirection ///< vector direction values.
 };
 
 /**
@@ -43,7 +43,7 @@ typedef NS_ENUM (NSInteger, CPTVectorFieldArrowType) {
     CPTVectorFieldArrowTypeNone,  ///< No arrow.
     CPTVectorFieldArrowTypeOpen,  ///< Open arrow .
     CPTVectorFieldArrowTypeSolid, ///< Solid arrow .
-    CPTVectorFieldArrowTypeSwept ///< Swept arrow.
+    CPTVectorFieldArrowTypeSwept  ///< Swept arrow.
 };
 
 #pragma mark -

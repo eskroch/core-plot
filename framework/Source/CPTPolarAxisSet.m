@@ -2,8 +2,8 @@
 
 #import "CPTDefinitions.h"
 #import "CPTLineStyle.h"
-#import "CPTUtilities.h"
 #import "CPTPolarAxis.h"
+#import "CPTUtilities.h"
 
 /**
  *  @brief A set of cartesian (Polar) axes.
@@ -24,7 +24,6 @@
  *  @brief The z-axis(circular axis for degrees).
  **/
 @dynamic radialAxis;
-
 
 #pragma mark -
 #pragma mark Init/Dealloc
@@ -49,7 +48,7 @@
  **/
 -(nonnull instancetype)initWithFrame:(CGRect)newFrame
 {
-    if ( (self = [super initWithFrame:newFrame]) ) {
+    if ((self = [super initWithFrame:newFrame])) {
         CPTPolarAxis *majorAxis = [(CPTPolarAxis *)[CPTPolarAxis alloc] initWithFrame:newFrame];
         majorAxis.coordinate    = CPTCoordinateX;
         majorAxis.tickDirection = CPTSignNegative;
@@ -61,10 +60,10 @@
         CPTPolarAxis *radialAxis = [(CPTPolarAxis *)[CPTPolarAxis alloc] initWithFrame:newFrame];
         radialAxis.coordinate    = CPTCoordinateZ;
         radialAxis.tickDirection = CPTSignNone;
-        
-        self.axes = [NSArray arrayWithObjects:majorAxis, minorAxis, radialAxis, nil];
-        minorAxis = nil;
-        minorAxis = nil;
+
+        self.axes  = [NSArray arrayWithObjects:majorAxis, minorAxis, radialAxis, nil];
+        minorAxis  = nil;
+        minorAxis  = nil;
         radialAxis = nil;
     }
     return self;
@@ -84,6 +83,7 @@
     }
 
     CPTLineStyle *theLineStyle = self.borderLineStyle;
+
     if ( theLineStyle ) {
         [super renderAsVectorInContext:context];
 
@@ -135,7 +135,6 @@
 }
 
 /// @}
-
 
 #pragma mark -
 #pragma mark Accessors

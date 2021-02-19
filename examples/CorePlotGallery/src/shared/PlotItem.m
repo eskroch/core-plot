@@ -20,7 +20,7 @@ NSString *const kBarPlots       = @"Bar Plots";
 NSString *const kFinancialPlots = @"Financial Plots";
 // added S.Wainwright
 NSString *const kFieldsPlots = @"Fields Plots";
-NSString *const kPolarPlots = @"Polar Plots";
+NSString *const kPolarPlots  = @"Polar Plots";
 
 @interface PlotItem()
 
@@ -316,25 +316,24 @@ NSString *const kPolarPlots = @"Polar Plots";
 
 #endif
 
-
 -(void)applyTheme:(nullable CPTTheme *)theme toGraph:(nonnull CPTGraph *)graph withDefault:(nullable CPTTheme *)defaultTheme
 {
     if ( theme == nil ) {
         [graph applyTheme:defaultTheme];
-    }  // added S.Wainwright
+    } // added S.Wainwright
     else if ( ![theme isKindOfClass:[NSNull class]] ) {
-        if( [self.section isEqualToString:kPolarPlots] ) {
-            if ([(NSString*)[[theme class] name] containsString:@" Polar"]) {
+        if ( [self.section isEqualToString:kPolarPlots] ) {
+            if ( [(NSString *)[[theme class] name] containsString:@" Polar"] ) {
                 [graph applyTheme:theme];
             }
             else {
-                CPTTheme *alteredTheme = [CPTTheme themeNamed: [NSString stringWithFormat:@"%@ Polar", (NSString*)[[theme class] name]]];
+                CPTTheme *alteredTheme = [CPTTheme themeNamed:[NSString stringWithFormat:@"%@ Polar", (NSString *)[[theme class] name]]];
                 [graph applyTheme:alteredTheme];
             }
         }
         else {
-            if ( [(NSString*)[[theme class] name] containsString:@" Polar"] ) {
-                CPTTheme *alteredTheme = [CPTTheme themeNamed: [(NSString*)[[theme class] name] stringByReplacingOccurrencesOfString:@" Polar" withString:@""]];
+            if ( [(NSString *)[[theme class] name] containsString:@" Polar"] ) {
+                CPTTheme *alteredTheme = [CPTTheme themeNamed:[(NSString *)[[theme class] name] stringByReplacingOccurrencesOfString:@" Polar" withString:@""]];
                 [graph applyTheme:alteredTheme];
             }
             else {

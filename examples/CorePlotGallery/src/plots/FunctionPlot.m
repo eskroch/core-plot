@@ -78,7 +78,7 @@
     minorGridLineStyle.lineColor = [[CPTColor whiteColor] colorWithAlphaComponent:CPTFloat(0.1)];
 
     // Axes
-    self.formatter = [[PiNumberFormatter alloc] init];
+    self.formatter            = [[PiNumberFormatter alloc] init];
     self.formatter.multiplier = @4;
 
     // Label x axis with a fixed interval policy
@@ -106,11 +106,11 @@
 
     y.title       = @"Y Axis";
     y.titleOffset = self.titleSize * CPTFloat(1.25);
-    
+
     // Labels TextSyles
-    UIFont *textFont = [UIFont fontWithName:@"Helvetica" size: 10.0];
-    self.textStyle = [[CPTMutableTextStyle alloc] init];
-    self.textStyle.font = textFont;
+    UIFont *textFont = [UIFont fontWithName:@"Helvetica" size:10.0];
+    self.textStyle               = [[CPTMutableTextStyle alloc] init];
+    self.textStyle.font          = textFont;
     self.textStyle.textAlignment = CPTTextAlignmentLeft;
 
     // Create some function plots
@@ -139,7 +139,7 @@
                 titleString = NSLocalizedString(@"y = tan(x)", @"y = tan(x)");
                 block       = ^(double xVal) {
                     double f = tan(xVal);
-                    if (f > 3.0 || f < -3.0) {
+                    if ((f > 3.0) || (f < -3.0)) {
                         double nan = (double)NAN;
                         return nan;
                     }
@@ -147,7 +147,7 @@
                         return tan(xVal);
                     }
                 };
-                lineColor   = [CPTColor blueColor];
+                lineColor = [CPTColor blueColor];
                 break;
         }
 
@@ -197,7 +197,7 @@
         plotDataSource.resolution = 2.0;
 
         [self.dataSources addObject:plotDataSource];
-        
+
         linePlot.appearanceDataSource = self;
 
         [graph addPlot:linePlot];
@@ -261,37 +261,38 @@
 
 #endif
 
-#pragma  mark - Data Label Source
+#pragma mark - Data Label Source
 
--(nullable CPTLayer *)dataLabelForPlot:(nonnull CPTPlot *)plot recordIndex:(NSUInteger)idx {
+-(nullable CPTLayer *)dataLabelForPlot:(nonnull CPTPlot *)plot recordIndex:(NSUInteger)idx
+{
     CPTTextLayer *labelLayer = nil;
-    if( idx % 20  == 0.0 ) {
+
+    if ( idx % 20 == 0.0 ) {
         double x = [plot cachedDoubleForField:CPTScatterPlotFieldX recordIndex:idx];
         double y = [plot cachedDoubleForField:CPTScatterPlotFieldY recordIndex:idx];
-        
+
         self.formatter.multiplier = @32;
-        NSString *theta = [self.formatter stringFromNumber:[NSNumber numberWithDouble:x]];
+        NSString *theta            = [self.formatter stringFromNumber:[NSNumber numberWithDouble:x]];
         NSString *annotationString = [NSString stringWithFormat:@"%@\n%0.3f", theta, y];
         self.formatter.multiplier = @4;
-        
-        CPTMutableTextStyle *plotTextStyle = [self.textStyle mutableCopy];
-        plotTextStyle.color = ((CPTScatterPlot*)plot).dataLineStyle.lineColor;
-        labelLayer = [[CPTTextLayer alloc] initWithText:annotationString style:plotTextStyle];
-        
-        CPTMutableLineStyle *lineStyleBorder = [[CPTMutableLineStyle alloc] init];
-        lineStyleBorder.lineColor = [CPTColor blackColor];
-        lineStyleBorder.lineWidth = 0.5;
-        labelLayer.borderLineStyle = lineStyleBorder;
-        labelLayer.cornerRadius = 5.0;
 
+        CPTMutableTextStyle *plotTextStyle = [self.textStyle mutableCopy];
+        plotTextStyle.color = ((CPTScatterPlot *)plot).dataLineStyle.lineColor;
+        labelLayer          = [[CPTTextLayer alloc] initWithText:annotationString style:plotTextStyle];
+
+        CPTMutableLineStyle *lineStyleBorder = [[CPTMutableLineStyle alloc] init];
+        lineStyleBorder.lineColor  = [CPTColor blackColor];
+        lineStyleBorder.lineWidth  = 0.5;
+        labelLayer.borderLineStyle = lineStyleBorder;
+        labelLayer.cornerRadius    = 5.0;
     }
     return labelLayer;
 }
 
-- (NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot {
+-(NSUInteger)numberOfRecordsForPlot:(nonnull CPTPlot *)plot
+{
     return 0;
 }
-
 
 #pragma mark - Legend delegate
 

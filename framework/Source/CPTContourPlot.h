@@ -1,19 +1,18 @@
 //
-//  CPTContourPlot.h
-//  CorePlot Mac
+// CPTContourPlot.h
+// CorePlot Mac
 //
-//  Created by Steve Wainwright on 19/12/2020.
+// Created by Steve Wainwright on 19/12/2020.
 //
 
 #import "CPTDefinitions.h"
-#import "CPTLineStyle.h"
-#import "CPTFill.h"
-#import "CPTPlot.h"
 #import "CPTFieldFunctionDataSource.h"
+#import "CPTFill.h"
+#import "CPTLineStyle.h"
+#import "CPTPlot.h"
 
 @class CPTFill;
 @class CPTContourPlot;
-
 
 /**
  *  @brief Contour plot bindings.
@@ -31,17 +30,17 @@ extern CPTContourPlotBinding __nonnull const CPTContourPlotBindingFunctionValues
  *  @brief Enumeration of Contourplot data source field types
  **/
 typedef NS_ENUM (NSInteger, CPTContourPlotField) {
-    CPTContourPlotFieldX,     ///< X values.
-    CPTContourPlotFieldY,     ///< Y values.
-    CPTContourPlotFieldFunctionValue,  ///< function value  values.
+    CPTContourPlotFieldX,            ///< X values.
+    CPTContourPlotFieldY,            ///< Y values.
+    CPTContourPlotFieldFunctionValue ///< function value  values.
 };
 
 /**
  *  @brief Enumeration of Contour plot interpolation algorithms
  **/
 typedef NS_ENUM (NSInteger, CPTContourPlotInterpolation) {
-    CPTContourPlotInterpolationLinear,    ///< Linear interpolation.
-    CPTContourPlotInterpolationCurved     ///< Curved interpolation.
+    CPTContourPlotInterpolationLinear, ///< Linear interpolation.
+    CPTContourPlotInterpolationCurved  ///< Curved interpolation.
 };
 
 /**
@@ -56,9 +55,7 @@ typedef NS_ENUM (NSInteger, CPTContourPlotCurvedInterpolationOption) {
     CPTContourPlotCurvedInterpolationHermiteCubic           ///< Hermite Cubic Spline Interpolation
 };
 
-double TestFunction(double x,double y);
-
-
+double TestFunction(double x, double y);
 
 #pragma mark -
 
@@ -117,7 +114,7 @@ double TestFunction(double x,double y);
 
 /// @}
 
-/// @name Isocurve Labeling 
+/// @name Isocurve Labeling
 /// @{
 
 /** @brief @optional Gets a range of data labels for the given plot.
@@ -141,7 +138,6 @@ double TestFunction(double x,double y);
 
 /// @}
 
-
 @end
 
 #pragma mark -
@@ -164,7 +160,7 @@ double TestFunction(double x,double y);
  *  @if MacOnly clicked bar. @endif
  *  @if iOSOnly touched bar. @endif
  **/
--(void) contourPlot:(nonnull  CPTContourPlot *)plot contourWasSelectedAtRecordIndex:(NSUInteger)idx;
+-(void)contourPlot:(nonnull CPTContourPlot *)plot contourWasSelectedAtRecordIndex:(NSUInteger)idx;
 
 /** @brief @optional Informs the delegate that  a contour base point
  *  @if MacOnly was both pressed and released. @endif
@@ -175,7 +171,7 @@ double TestFunction(double x,double y);
  *  @if iOSOnly touched bar. @endif
  *  @param event The event that triggered the selection.
  **/
--(void) contourPlot:(nonnull  CPTContourPlot *)plot contourWasSelectedAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
+-(void)contourPlot:(nonnull CPTContourPlot *)plot contourWasSelectedAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
 
 /** @brief @optional Informs the delegate that a contour base point
  *  @if MacOnly was pressed. @endif
@@ -185,7 +181,7 @@ double TestFunction(double x,double y);
  *  @if MacOnly clicked bar. @endif
  *  @if iOSOnly touched bar. @endif
  **/
--(void) contourPlot:(nonnull  CPTContourPlot *)plot  contourTouchDownAtRecordIndex:(NSUInteger)idx;
+-(void)contourPlot:(nonnull CPTContourPlot *)plot contourTouchDownAtRecordIndex:(NSUInteger)idx;
 
 /** @brief @optional Informs the delegate that a contour base point
  *  @if MacOnly was pressed. @endif
@@ -196,7 +192,7 @@ double TestFunction(double x,double y);
  *  @if iOSOnly touched bar. @endif
  *  @param event The event that triggered the selection.
  **/
--(void) contourPlot:(nonnull  CPTContourPlot *)plot  contourTouchDownAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
+-(void)contourPlot:(nonnull CPTContourPlot *)plot contourTouchDownAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
 
 /** @brief @optional Informs the delegate that a contour base point
  *  @if MacOnly was released. @endif
@@ -206,7 +202,7 @@ double TestFunction(double x,double y);
  *  @if MacOnly clicked bar. @endif
  *  @if iOSOnly touched bar. @endif
  **/
--(void) contourPlot:(nonnull  CPTContourPlot *)plot  contourTouchUpAtRecordIndex:(NSUInteger)idx;
+-(void)contourPlot:(nonnull CPTContourPlot *)plot contourTouchUpAtRecordIndex:(NSUInteger)idx;
 
 /** @brief @optional Informs the delegate that a contour base point
  *  @if MacOnly was released. @endif
@@ -217,7 +213,7 @@ double TestFunction(double x,double y);
  *  @if iOSOnly touched bar. @endif
  *  @param event The event that triggered the selection.
  **/
--(void) contourPlot:(nonnull  CPTContourPlot *)plot  contourTouchUpAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
+-(void)contourPlot:(nonnull CPTContourPlot *)plot contourTouchUpAtRecordIndex:(NSUInteger)idx withEvent:(nonnull CPTNativeEvent *)event;
 
 /// @}
 
@@ -231,7 +227,7 @@ double TestFunction(double x,double y);
 /// @{
 @property (nonatomic, readwrite, strong, nullable) CPTContourDataSourceBlock dataSourceBlock;
 /// @}
- 
+
 /// @name Contour Appearance Data Source
 /// @{
 @property (nonatomic, readwrite, cpt_weak_property, nullable) id<CPTPlotDataSource> contourAppearanceDataSource;
@@ -252,7 +248,7 @@ double TestFunction(double x,double y);
 @property (nonatomic, readwrite, strong, nullable) NSFormatter *isoCurvesLabelFormatter;
 @property (nonatomic, readwrite, strong, nullable) CPTShadow *isoCurvesLabelShadow;
 @property (nonatomic, readwrite, assign) BOOL showIsoCurvesLabels;
-@property (nonatomic, readwrite, strong, nonnull) CPTMutableNumberArray *limits;       // left, right, bottom, top;
+@property (nonatomic, readwrite, strong, nonnull) CPTMutableNumberArray *limits; // left, right, bottom, top;
 /// @}
 
 /// @name Contour IsoCurve Styles
@@ -274,4 +270,3 @@ double TestFunction(double x,double y);
 /// @}
 
 @end
-

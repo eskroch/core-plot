@@ -19,7 +19,7 @@
 
 -(void)setUp
 {
-    CPTNumberArray *thetaValues = @[@0.0, @90., @180.0, @270.0, @360.0];
+    CPTNumberArray *thetaValues  = @[@0.0, @90., @180.0, @270.0, @360.0];
     CPTNumberArray *radiusValues = @[@0.5, @0.5, @0.5, @0.5, @0.5];
 
     self.plot = [CPTPolarPlot new];
@@ -31,6 +31,7 @@
     CPTPlotRange *xPlotRange = [CPTPlotRange plotRangeWithLocation:@0.0 length:@1.0];
     CPTPlotRange *yPlotRange = [CPTPlotRange plotRangeWithLocation:@0.0 length:@1.0];
     CPTPlotRange *zPlotRange = [CPTPlotRange plotRangeWithLocation:@0.0 length:@360.0];
+
     self.plotSpace        = [[CPTPolarPlotSpace alloc] init];
     self.plotSpace.xRange = xPlotRange;
     self.plotSpace.yRange = yPlotRange;

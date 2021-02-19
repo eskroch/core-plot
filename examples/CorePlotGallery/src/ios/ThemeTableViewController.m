@@ -34,7 +34,7 @@ NSString *const PlotGalleryThemeNameKey               = @"PlotGalleryThemeNameKe
 
     for ( Class themeClass in [CPTTheme themeClasses] ) {
         // added S.Wainwright
-        if(![[themeClass name] containsString:@" Polar"]) {
+        if ( ![[themeClass name] containsString:@" Polar"] ) {
             [themeList addObject:[themeClass name]];
         }
     }

@@ -55,9 +55,9 @@
  **/
 -(nonnull instancetype)initWithFrame:(CGRect)newFrame majorScaleType:(CPTScaleType)newMajorScaleType minorScaleType:(CPTScaleType)newMinorScaleType
 {
-    if ( (self = [self initWithFrame:newFrame]) ) {
-        majorScaleType = newMajorScaleType;
-        minorScaleType = newMinorScaleType;
+    if ((self = [self initWithFrame:newFrame])) {
+        majorScaleType  = newMajorScaleType;
+        minorScaleType  = newMinorScaleType;
         radialScaleType = CPTScaleTypeLinear; // always linear
     }
     return self;
@@ -77,8 +77,8 @@
 -(nonnull instancetype)initWithFrame:(CGRect)newFrame
 {
     if ((self = [super initWithFrame:newFrame])) {
-        majorScaleType = CPTScaleTypeLinear;
-        minorScaleType = CPTScaleTypeLinear;
+        majorScaleType  = CPTScaleTypeLinear;
+        minorScaleType  = CPTScaleTypeLinear;
         radialScaleType = CPTScaleTypeLinear;
     }
     return self;
@@ -90,11 +90,11 @@
 
 -(nonnull instancetype)initWithLayer:(id)layer
 {
-    if ( (self = [super initWithLayer:layer]) ) {
+    if ((self = [super initWithLayer:layer])) {
         CPTPolarGraph *theLayer = (CPTPolarGraph *)layer;
 
-        majorScaleType = theLayer->majorScaleType;
-        minorScaleType = theLayer->minorScaleType;
+        majorScaleType  = theLayer->majorScaleType;
+        minorScaleType  = theLayer->minorScaleType;
         radialScaleType = theLayer->radialScaleType;
     }
     return self;
@@ -118,10 +118,10 @@
 
 -(nullable instancetype)initWithCoder:(NSCoder *)coder
 {
-    if ( (self = [super initWithCoder:coder]) ) {
-        majorScaleType = (CPTScaleType)[coder decodeIntForKey : @"CPTPolarGraph.majorScaleType"];
-        minorScaleType = (CPTScaleType)[coder decodeIntForKey : @"CPTPolarGraph.minorScaleType"];
-        radialScaleType = (CPTScaleType)[coder decodeIntForKey : @"CPTPolarGraph.radialScaleType"];
+    if ((self = [super initWithCoder:coder])) {
+        majorScaleType  = (CPTScaleType)[coder decodeIntForKey:@"CPTPolarGraph.majorScaleType"];
+        minorScaleType  = (CPTScaleType)[coder decodeIntForKey:@"CPTPolarGraph.minorScaleType"];
+        radialScaleType = (CPTScaleType)[coder decodeIntForKey:@"CPTPolarGraph.radialScaleType"];
     }
     return self;
 }
@@ -139,7 +139,7 @@
 
     space.majorScaleType = self.majorScaleType;
     space.minorScaleType = self.minorScaleType;
-    
+
     return space;
 }
 
@@ -147,8 +147,8 @@
 {
     CPTPolarAxisSet *newAxisSet = [(CPTPolarAxisSet *)[CPTPolarAxisSet alloc] initWithFrame:self.bounds];
 
-    newAxisSet.majorAxis.plotSpace = self.defaultPlotSpace;
-    newAxisSet.minorAxis.plotSpace = self.defaultPlotSpace;
+    newAxisSet.majorAxis.plotSpace  = self.defaultPlotSpace;
+    newAxisSet.minorAxis.plotSpace  = self.defaultPlotSpace;
     newAxisSet.radialAxis.plotSpace = self.defaultPlotSpace;
     return newAxisSet;
 }

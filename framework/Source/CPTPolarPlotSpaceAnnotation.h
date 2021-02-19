@@ -1,8 +1,8 @@
 //
-//  CPTPolarPlotSpaceAnnotation.h
-//  CorePlot Mac
+// CPTPolarPlotSpaceAnnotation.h
+// CorePlot Mac
 //
-//  Created by Steve Wainwright on 10/12/2020.
+// Created by Steve Wainwright on 10/12/2020.
 //
 
 #import "CPTAnnotation.h"

@@ -1,9 +1,9 @@
 #import "_CPTPolarTheme.h"
 
 #import "CPTPlotRange.h"
-#import "CPTUtilities.h"
 #import "CPTPolarGraph.h"
 #import "CPTPolarPlotSpace.h"
+#import "CPTUtilities.h"
 
 /**
  *  @brief Creates a CPTPolarGraph instance formatted with padding of 60 on each side and X and Y plot ranges of +/- 1.
@@ -15,7 +15,7 @@
 
 -(nonnull instancetype)init
 {
-    if ( (self = [super init]) ) {
+    if ((self = [super init])) {
         self.graphClass = [CPTPolarGraph class];
     }
     return self;
@@ -39,6 +39,7 @@
     graph.paddingBottom = CPTFloat(60.0);
 
     CPTPolarPlotSpace *plotSpace = (CPTPolarPlotSpace *)graph.defaultPlotSpace;
+
     plotSpace.majorRange = [CPTPlotRange plotRangeWithLocation:@(-1.0) length:@2.0];
     plotSpace.minorRange = [CPTPlotRange plotRangeWithLocation:@(-1.0) length:@2.0];
 

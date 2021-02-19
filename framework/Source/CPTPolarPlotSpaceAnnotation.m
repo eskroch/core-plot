@@ -1,17 +1,17 @@
 //
-//  CPTPolarPlotSpaceAnnotation.m
-//  CorePlot iOS/Mac
+// CPTPolarPlotSpaceAnnotation.m
+// CorePlot iOS/Mac
 //
-//  Created by Steve Wainwright on 10/12/2020.
+// Created by Steve Wainwright on 10/12/2020.
 //
 
 #import "CPTPolarPlotSpaceAnnotation.h"
 
 #import "CPTExceptions.h"
-#import "CPTUtilities.h"
 #import "CPTPlotArea.h"
 #import "CPTPlotAreaFrame.h"
 #import "CPTPolarPlotSpace.h"
+#import "CPTUtilities.h"
 
 /// @cond
 
@@ -68,17 +68,17 @@
 {
     NSParameterAssert(newPlotSpace);
 
-    if ( (self = [super init]) ) {
-        plotSpace            = newPlotSpace;
-//        if ( plotSpace.radialAngleOption == CPTPolarRadialAngleModeDegrees && newPlotPoint != nil ) {
-//            NSNumber *theta = newPlotPoint[0];
-//            theta = [NSNumber numberWithDouble: [theta doubleValue] * M_PI / 180.0];
-//            CPTNumberArray *adjustedNewPlotPoint = [CPTNumberArray arrayWithObjects: theta, newPlotPoint[1], nil];
-//            self.anchorPlotPoint = adjustedNewPlotPoint;
-//        }
-//        else {
-            self.anchorPlotPoint = newPlotPoint;
-//        }
+    if ((self = [super init])) {
+        plotSpace = newPlotSpace;
+// if ( plotSpace.radialAngleOption == CPTPolarRadialAngleModeDegrees && newPlotPoint != nil ) {
+// NSNumber *theta = newPlotPoint[0];
+// theta = [NSNumber numberWithDouble: [theta doubleValue] * M_PI / 180.0];
+// CPTNumberArray *adjustedNewPlotPoint = [CPTNumberArray arrayWithObjects: theta, newPlotPoint[1], nil];
+// self.anchorPlotPoint = adjustedNewPlotPoint;
+// }
+// else {
+        self.anchorPlotPoint = newPlotPoint;
+// }
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(setContentNeedsLayout)
                                                      name:CPTPlotSpaceCoordinateMappingDidChangeNotification
@@ -127,12 +127,12 @@
  */
 -(nullable instancetype)initWithCoder:(nonnull NSCoder *)coder
 {
-    if ( (self = [super initWithCoder:coder]) ) {
+    if ((self = [super initWithCoder:coder])) {
         self.anchorPlotPoint = [[coder decodeObjectOfClasses:[NSSet setWithArray:@[[NSArray class], [NSNumber class]]]
                                                       forKey:@"CPTPolarPlotSpaceAnnotation.anchorPlotPoint"] copy];
 
         CPTPolarPlotSpace *thePlotSpace = [coder decodeObjectOfClass:[CPTPolarPlotSpace class]
-                                                         forKey:@"CPTPolarPlotSpaceAnnotation.plotSpace"];
+                                                              forKey:@"CPTPolarPlotSpaceAnnotation.plotSpace"];
         if ( thePlotSpace ) {
             plotSpace = thePlotSpace;
 
@@ -177,22 +177,22 @@
             CPTNumberArray *plotAnchor = self.anchorPlotPoint;
             if ( plotAnchor ) {
                 // Get plot area point
-                CPTPolarPlotSpace *thePlotSpace      = self.plotSpace;
+                CPTPolarPlotSpace *thePlotSpace = self.plotSpace;
 
                 double theta = CPTDecimalDoubleValue(self.decimalAnchor[0]);
-                if (thePlotSpace.radialAngleOption == CPTPolarRadialAngleModeDegrees) {
+                if ( thePlotSpace.radialAngleOption == CPTPolarRadialAngleModeDegrees ) {
                     theta *= M_PI / 180.0;
                 }
-                
+
                 double plotPoint[2];
                 plotPoint[CPTCoordinateX] = CPTDecimalDoubleValue(self.decimalAnchor[1]);
                 plotPoint[CPTCoordinateY] = 0.0;
-                
+
                 double centrePlotPoint[2];
                 centrePlotPoint[CPTCoordinateX] = 0.0;
                 centrePlotPoint[CPTCoordinateY] = 0.0;
-                
-                CGPoint centrePoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:centrePlotPoint numberOfCoordinates:self.anchorCount];
+
+                CGPoint centrePoint             = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:centrePlotPoint numberOfCoordinates:self.anchorCount];
                 CGPoint plotAreaViewAnchorPoint = [thePlotSpace plotAreaViewPointForDoublePrecisionPlotPoint:plotPoint numberOfCoordinates:2];
                 plotAreaViewAnchorPoint = CPTPointMake((plotAreaViewAnchorPoint.x - centrePoint.x) * sin(theta) + centrePoint.x, (plotAreaViewAnchorPoint.x - centrePoint.x) * cos(theta) + centrePoint.y);
 
@@ -211,7 +211,7 @@
 
                 content.anchorPoint = self.contentAnchorPoint;
                 content.position    = newPosition;
-                content.transform   = CATransform3DMakeRotation(self.rotation, CPTFloat(0.0), CPTFloat(0.0), CPTFloat(1.0) );
+                content.transform   = CATransform3DMakeRotation(self.rotation, CPTFloat(0.0), CPTFloat(0.0), CPTFloat(1.0));
                 [content pixelAlign];
             }
         }
@@ -232,7 +232,7 @@
 
         self.anchorCount = anchorPlotPoint.count;
 
-        NSDecimal *decimalPoint = calloc(self.anchorCount, sizeof(NSDecimal) );
+        NSDecimal *decimalPoint = calloc(self.anchorCount, sizeof(NSDecimal));
         for ( NSUInteger i = 0; i < self.anchorCount; i++ ) {
             decimalPoint[i] = anchorPlotPoint[i].decimalValue;
         }
