@@ -905,8 +905,8 @@ void freeContourPoints(ContourPoints *a)
                 limit1 = [self.limits[3] doubleValue];
             }
         }
-        double _limits[4]                                      = { limit0 * 1.01, limit1 * 1.01, limit0 * 1.01, limit1 * 1.01 };
-        COREPLOT_CONTOURS::CContours                 *contours = newCOREPLOT_CONTOURS::CContours(static_cast<const int>(self.noIsoCurves), planesValues, static_cast<double *>(_limits));
+        double _limits[4]                      = { limit0 * 1.01, limit1 * 1.01, limit0 * 1.01, limit1 * 1.01 };
+        COREPLOT_CONTOURS::CContours *contours = new COREPLOT_CONTOURS::CContours(static_cast<const int>(self.noIsoCurves), planesValues, static_cast<double *>(_limits));
 
         contours->setFieldBlock(self.dataSourceBlock);
         contours->generate();
